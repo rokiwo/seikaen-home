@@ -1,4 +1,4 @@
-const CACHE_NAME = 'seikaen-home-v3';
+const CACHE_NAME = 'seikaen-home-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
