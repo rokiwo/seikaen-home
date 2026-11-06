@@ -187,6 +187,71 @@
       overflow-x: hidden;
     }
 
+    /* トップナビゲーションバー */
+    .top-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 2px 12px 2px;
+      margin-bottom: 2px;
+    }
+    .top-nav-logo {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-shadow: var(--text-shadow);
+      color: #ffffff;
+    }
+    .top-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-btn {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .nav-btn:active {
+      transform: scale(0.95);
+    }
+    .nav-btn-refresh {
+      color: #cbd5e1;
+    }
+    .nav-btn-refresh:hover {
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+    .nav-btn-admin {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: rgba(245, 158, 11, 0.6);
+      color: #fbbf24;
+    }
+    .nav-btn-admin:hover {
+      background: rgba(245, 158, 11, 0.4);
+    }
+    .nav-btn-admin.is-active {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+
     /* 新着アプリお知らせバナー（1週間以内） */
     .news-banner {
       display: none;
@@ -939,6 +1004,22 @@
   <div class="bg-overlay"></div>
 
   <div class="main-wrapper">
+    <!-- トップナビゲーションバー（ロゴ・最新更新・管理者ログイン切替） -->
+    <header class="top-nav-bar">
+      <div class="top-nav-logo">
+        <i class="fas fa-home" style="color:#60a5fa;"></i>
+        <span>清華苑 ポータル</span>
+      </div>
+      <div class="top-nav-actions">
+        <button class="nav-btn nav-btn-refresh" title="キャッシュをクリアして最新版に更新" onclick="forceAppRefresh()">
+          <i class="fas fa-sync-alt"></i> <span>更新</span>
+        </button>
+        <button id="navAdminBtn" class="nav-btn nav-btn-admin" title="管理者モードにログイン（0800）" onclick="handleNavAdminClick()">
+          <i class="fas fa-lock"></i> <span id="navAdminBtnText">管理者</span>
+        </button>
+      </div>
+    </header>
+
     <!-- 管理者ダッシュボード（管理画面モード時のみ出現） -->
     <div id="adminDashboardPanel" class="admin-dashboard-panel">
       <div class="admin-panel-header">
@@ -1283,6 +1364,30 @@
     </div>
   </div>
 
+  <!-- 管理者パスコード入力専用モーダル -->
+  <div id="adminLoginModal" class="modal-overlay" onclick="handleOverlayClick(event, 'adminLoginModal')">
+    <div class="modal-card" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-shield-alt" style="color: #f59e0b;"></i> 管理者認証</h3>
+        <button class="modal-close-icon" onclick="closeModal('adminLoginModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="padding: 10px 0;">
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+          アプリの登録（インサート）や削除を行うには、管理者パスコードを入力してください。
+        </p>
+        <div class="form-group" style="margin-bottom: 20px;">
+          <input type="password" id="dedicatedAdminPassInput" class="form-input" placeholder="パスコード（初期: 0800）" inputmode="numeric" pattern="[0-9]*" style="font-size: 22px; letter-spacing: 6px; text-align: center; height: 50px; font-weight: bold;" onkeydown="if(event.key==='Enter') checkDedicatedAdminPassword()">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal('adminLoginModal')">閉じる</button>
+          <button type="button" class="btn btn-primary" style="flex:1.5; background: linear-gradient(135deg, #f59e0b, #d97706); font-weight: 700;" onclick="checkDedicatedAdminPassword()">
+            <i class="fas fa-unlock"></i> ログイン
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- トースト通知 -->
   <div id="toast" class="toast"></div>
 
@@ -1444,12 +1549,65 @@
       const delFolderBtn = document.getElementById('btnDeleteFolder');
       if (delFolderBtn) delFolderBtn.style.display = active ? 'block' : 'none';
 
+      // ヘッダーナビのボタン更新
+      const navBtn = document.getElementById('navAdminBtn');
+      if (navBtn) {
+        if (active) {
+          navBtn.classList.add('is-active');
+          navBtn.innerHTML = '<i class="fas fa-arrow-left"></i> <span>一般に戻る</span>';
+          navBtn.title = '一般モード（閲覧・並び替え）に戻る';
+        } else {
+          navBtn.classList.remove('is-active');
+          navBtn.innerHTML = '<i class="fas fa-lock"></i> <span>管理者</span>';
+          navBtn.title = '管理者モードにログイン（0800）';
+        }
+      }
+
       if (active) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       renderApps();
     }
 
+    // 専用管理者モーダルの開閉と認証
+    function openAdminLoginModal() {
+      vibrate(15);
+      const input = document.getElementById('dedicatedAdminPassInput');
+      if (input) input.value = '';
+      openModal('adminLoginModal');
+      setTimeout(() => {
+        if (input) input.focus();
+      }, 200);
+    }
+
+    function checkDedicatedAdminPassword() {
+      const input = document.getElementById('dedicatedAdminPassInput');
+      const val = input ? input.value.trim() : '';
+      const currentPass = getAdminPassword();
+      if (val === currentPass) {
+        vibrate(20);
+        closeModal('adminLoginModal');
+        setAdminMode(true);
+        showToast('🛠️ 管理者画面を開きました（インサート操作可能）');
+      } else {
+        vibrate(50);
+        alert('パスコードが正しくありません（初期設定: 0800）');
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+      }
+    }
+
+    function handleNavAdminClick() {
+      if (isAdmin) {
+        logoutAdmin();
+      } else {
+        openAdminLoginModal();
+      }
+    }
+
+    // 設定モーダル内のログイン用
     function checkAdminPassword() {
       const input = document.getElementById('adminPassInput').value.trim();
       const currentPass = getAdminPassword();
@@ -1469,6 +1627,33 @@
       vibrate(15);
       setAdminMode(false);
       showToast('一般画面に戻りました');
+    }
+
+    // 強制最新状態更新（Service Worker＆キャッシュ完全クリア）
+    async function forceAppRefresh() {
+      vibrate(20);
+      showToast('🔄 キャッシュをクリアして最新版を取得中...');
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (let reg of registrations) {
+            await reg.unregister();
+          }
+        }
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          for (let k of keys) {
+            await caches.delete(k);
+          }
+        }
+      } catch (e) {
+        console.warn('キャッシュクリアエラー:', e);
+      }
+      localStorage.removeItem('seikaen_apps_data');
+      localStorage.removeItem('seikaen_prompts_data');
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 400);
     }
 
     // ▼▼ JSON一括インサート機能 ▼▼
