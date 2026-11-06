@@ -1,14 +1,14 @@
-const CACHE_NAME = 'seikaen-home-v1';
+const CACHE_NAME = 'seikaen-home-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './apps.json',
+  './prompts.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js'
 ];
 
-// インストール時にコアアセットをキャッシュ
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -20,7 +20,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// アクティベーション時に古いキャッシュを整理
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -36,7 +35,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// フェッチ処理（Stale-While-Revalidate: キャッシュから即時返しつつ裏で更新）
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
