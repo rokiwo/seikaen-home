@@ -1361,24 +1361,66 @@
           </div>
         </div>
 
-        <!-- 📢 新機能・更新アナウンス設定（空欄なら自動生成・手間ゼロ） -->
-        <div class="form-group" style="background: rgba(236, 72, 153, 0.08); border: 1.5px dashed rgba(236, 72, 153, 0.4); border-radius: 14px; padding: 12px; margin-top: 10px; margin-bottom: 16px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 6px;">
-            <label class="form-label" style="margin-bottom:0; color:#db2777; font-weight:700; font-size:13px;">
-              <i class="fas fa-bullhorn"></i> 新機能・更新アナウンス（1週間トップに掲載）
+        <!-- 📢 アプリ登録と一体化したアナウンス設定（別ボタン不要で連続完了！） -->
+        <div class="form-group" style="background: linear-gradient(135deg, rgba(236,72,153,0.08), rgba(244,63,94,0.04)); border: 1.5px solid #fda4af; border-radius: 14px; padding: 14px; margin-top: 14px; margin-bottom: 16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 8px;">
+            <label class="form-label" style="margin-bottom:0; color:#be123c; font-weight:800; font-size:13px;">
+              <i class="fas fa-bullhorn" style="color:#e11d48;"></i> トップバーへの新着・更新アナウンス
             </label>
-            <span style="font-size:10.5px; background:linear-gradient(135deg, #ec4899, #f43f5e); color:white; padding:2px 7px; border-radius:10px; font-weight:800;">自動設定</span>
+            <label style="display:flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:#be123c; cursor:pointer;">
+              <input type="checkbox" id="formAppAnnounceToggle" checked style="width:16px; height:16px; accent-color:#e11d48;" onchange="toggleAnnounceInput(this.checked)">
+              1週間アナウンスする
+            </label>
           </div>
-          <input type="text" id="formAppNotice" class="form-input" placeholder="空欄のままでOK（自動でお知らせ文が作られます）" style="font-size:13px; background:white;">
-          <span style="font-size:11px; color:#64748b; margin-top:5px; display:block; line-height:1.4;">
-            💡 <strong>面倒な入力は一切不要！</strong> 空欄で保存しても「新機能/更新」として自動で1週間トップの新機能バーにアナウンスされます。
-          </span>
+          <div id="announceInputContainer">
+            <input type="text" id="formAppNotice" class="form-input" placeholder="お知らせ文（空欄なら自動生成されます）" style="font-size:13px; background:white; border-color:#fecdd3;">
+            <span style="font-size:11px; color:#64748b; margin-top:5px; display:block; line-height:1.4;">
+              💡 <strong>別のボタンを押す必要はありません！</strong> このまま保存するだけで、自動的に1週間（7日間）トップバーにアナウンスされます。
+            </span>
+          </div>
         </div>
 
-        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> 保存する</button>
-        <button type="button" id="btnMoveOutFolder" class="btn btn-secondary" style="display:none;" onclick="moveOutFromFolder()"><i class="fas fa-sign-out-alt"></i> このフォルダから出す</button>
-        <button type="button" id="btnDeleteApp" class="btn btn-danger" style="display:none;" onclick="deleteCurrentApp()"><i class="fas fa-trash"></i> 削除する</button>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button type="submit" id="btnSubmitAppForm" class="btn btn-primary" style="background: linear-gradient(135deg, #ec4899, #e11d48); font-size:14px; font-weight:800; padding:12px; box-shadow:0 4px 14px rgba(225,29,72,0.35);">
+            <i class="fas fa-bullhorn"></i> 保存して1週間アナウンスを公開
+          </button>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal('appModal')">キャンセル</button>
+            <button type="button" id="btnMoveOutFolder" class="btn btn-secondary" style="display:none; flex:1;" onclick="moveOutFromFolder()"><i class="fas fa-sign-out-alt"></i> フォルダから出す</button>
+            <button type="button" id="btnDeleteApp" class="btn btn-danger" style="display:none; flex:1;" onclick="deleteCurrentApp()"><i class="fas fa-trash"></i> 削除</button>
+          </div>
+        </div>
       </form>
+    </div>
+  </div>
+
+  <!-- アプリ登録完了直後のアナウンス連続確認モーダル -->
+  <div id="announceSuccessModal" class="modal-overlay" onclick="handleOverlayClick(event, 'announceSuccessModal')">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div style="width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #ec4899, #f43f5e); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 12px auto; box-shadow: 0 4px 14px rgba(236,72,153,0.4);">
+        <i class="fas fa-bullhorn"></i>
+      </div>
+      <h3 style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 6px;">アナウンスを公開しました！</h3>
+      <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+        アプリの保存と同時に、トップバーへ1週間のアナウンス掲載を開始しました。
+      </p>
+
+      <!-- 掲載プレビューカード -->
+      <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 12px; text-align: left; margin-bottom: 18px;">
+        <div style="font-size: 11px; font-weight: 700; color: #be123c; margin-bottom: 4px;">
+          <i class="fas fa-eye"></i> トップバー掲載プレビュー
+        </div>
+        <div id="announceSuccessPreview" style="font-size: 13.5px; font-weight: 700; color: #881337; line-height: 1.4;">
+          <!-- 動的生成 -->
+        </div>
+        <div id="announceSuccessPeriod" style="font-size: 11px; color: #9f1239; margin-top: 6px; display:flex; align-items:center; gap:4px;">
+          <i class="far fa-calendar-alt"></i> 掲載期間: 本日から1週間
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" style="background: linear-gradient(135deg, #ec4899, #f43f5e); font-weight: 700; padding:10px;" onclick="closeModal('announceSuccessModal')">
+        <i class="fas fa-check"></i> 確認完了（閉じる）
+      </button>
     </div>
   </div>
 
@@ -3070,6 +3112,11 @@
       if (noticeInput) {
         noticeInput.value = app.announcementNote || '';
       }
+      const toggle = document.getElementById('formAppAnnounceToggle');
+      if (toggle) {
+        toggle.checked = !app.dismissedAnnouncement;
+        toggleAnnounceInput(toggle.checked);
+      }
 
       if (app.imageData) {
         const preview = document.getElementById('imagePreview');
@@ -3088,6 +3135,11 @@
       document.getElementById('editParentFolder').value = '';
       const noticeInput = document.getElementById('formAppNotice');
       if (noticeInput) noticeInput.value = '';
+      const toggle = document.getElementById('formAppAnnounceToggle');
+      if (toggle) {
+        toggle.checked = true;
+        toggleAnnounceInput(true);
+      }
       document.getElementById('imagePreviewContainer').style.display = 'none';
       document.getElementById('iconCandidatesArea').style.display = 'none';
       document.getElementById('iconCandidatesList').innerHTML = '';
@@ -3162,6 +3214,20 @@
       reader.readAsDataURL(file);
     }
 
+    function toggleAnnounceInput(checked) {
+      const container = document.getElementById('announceInputContainer');
+      const submitBtn = document.getElementById('btnSubmitAppForm');
+      if (container) container.style.opacity = checked ? '1' : '0.4';
+      if (submitBtn) {
+        submitBtn.innerHTML = checked 
+          ? '<i class="fas fa-bullhorn"></i> 保存して1週間アナウンスを公開'
+          : '<i class="fas fa-check"></i> アナウンスなしで保存';
+        submitBtn.style.background = checked
+          ? 'linear-gradient(135deg, #ec4899, #e11d48)'
+          : 'linear-gradient(135deg, #3b82f6, #2563eb)';
+      }
+    }
+
     function saveAppForm(e) {
       e.preventDefault();
       if (!isAdmin) return;
@@ -3174,6 +3240,7 @@
       const dept = document.getElementById('formAppDept').value.trim();
       const imageData = document.getElementById('formAppImage').value.trim();
       const parent = document.getElementById('editParentFolder').value;
+      const doAnnounce = document.getElementById('formAppAnnounceToggle') ? document.getElementById('formAppAnnounceToggle').checked : true;
       const noticeInput = document.getElementById('formAppNotice');
       const notice = noticeInput ? noticeInput.value.trim() : '';
 
@@ -3182,7 +3249,11 @@
         return;
       }
 
+      let finalNotice = '';
+      let isUpdated = false;
+
       if (id) {
+        isUpdated = true;
         const target = allApps.find(a => Number(a.id) === Number(id));
         if (target) {
           target.name = name;
@@ -3190,12 +3261,18 @@
           target.category = category;
           target.dept = dept;
           target.imageData = imageData;
-          target.updatedAt = new Date().toISOString(); // ★修正日時を更新（今日から1週間残る！）
-          delete target.dismissedAnnouncement;
-          target.announcementNote = notice || '機能や設定をアップデートしました！';
+          if (doAnnounce) {
+            target.updatedAt = new Date().toISOString(); // ★修正日時を更新（今日から1週間残る！）
+            delete target.dismissedAnnouncement;
+            finalNotice = notice || '機能や設定をアップデートしました！';
+            target.announcementNote = finalNotice;
+          } else {
+            target.dismissedAnnouncement = true;
+          }
         }
-        showToast(`「${name}」を更新しました（1週間UPアナウンス掲載）`);
       } else {
+        const nowIso = new Date().toISOString();
+        finalNotice = notice || '新しいアプリが追加されました！';
         const newApp = {
           id: Date.now(),
           name,
@@ -3205,17 +3282,36 @@
           type: 'app',
           parent: '',
           category,
-          createdAt: new Date().toISOString(), // ★登録日時（今日から1週間残る！）
-          announcementNote: notice || '新しいアプリが追加されました！'
+          createdAt: nowIso,
+          updatedAt: nowIso,
+          announcementNote: finalNotice,
+          dismissedAnnouncement: !doAnnounce
         };
         allApps.unshift(newApp);
-        showToast(`「${name}」を登録しました（1週間NEWアナウンス掲載）`);
       }
 
       saveAppsData();
       closeModal('appModal');
       renderApps();
       checkNewAppsBanner();
+
+      // ★★★ 登録から連続でアナウンス確認モーダルを表示！別のボタンを押す必要ゼロ ★★★
+      if (doAnnounce) {
+        vibrate([15, 60, 20]);
+        const previewEl = document.getElementById('announceSuccessPreview');
+        const periodEl = document.getElementById('announceSuccessPeriod');
+        const prefix = isUpdated ? '🔄 更新' : '✨ 新機能';
+        if (previewEl) {
+          previewEl.innerHTML = `<strong>${prefix}: 「${escapeHtml(name)}」</strong><div style="font-weight:normal; font-size:12px; color:#475569; margin-top:3px;">${escapeHtml(finalNotice)}</div>`;
+        }
+        if (periodEl) {
+          const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+          periodEl.innerHTML = `<i class="far fa-calendar-alt"></i> 掲載期間: 本日 〜 ${endDate.getMonth() + 1}月${endDate.getDate()}日（1週間自動掲載）`;
+        }
+        openModal('announceSuccessModal');
+      } else {
+        showToast(`「${name}」を保存しました`);
+      }
     }
 
     function moveOutFromFolder() {
