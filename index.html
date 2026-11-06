@@ -237,6 +237,19 @@
       color: #38bdf8;
       border-color: #38bdf8;
     }
+    .nav-btn-news {
+      background: rgba(236, 72, 153, 0.25);
+      border-color: rgba(236, 72, 153, 0.6);
+      color: #f472b6;
+      animation: pulseNews 2s infinite ease-in-out;
+    }
+    .nav-btn-news:hover {
+      background: rgba(236, 72, 153, 0.45);
+    }
+    @keyframes pulseNews {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25); }
+      50% { transform: scale(1.04); box-shadow: 0 4px 16px rgba(236, 72, 153, 0.5); }
+    }
     .nav-btn-admin {
       background: rgba(245, 158, 11, 0.25);
       border-color: rgba(245, 158, 11, 0.6);
@@ -1004,13 +1017,16 @@
   <div class="bg-overlay"></div>
 
   <div class="main-wrapper">
-    <!-- トップナビゲーションバー（ロゴ・最新更新・管理者ログイン切替） -->
+    <!-- トップナビゲーションバー（ロゴ・新機能・最新更新・管理者ログイン切替） -->
     <header class="top-nav-bar">
       <div class="top-nav-logo">
         <i class="fas fa-home" style="color:#60a5fa;"></i>
         <span>清華苑 ポータル</span>
       </div>
       <div class="top-nav-actions">
+        <button id="navNewsBtn" class="nav-btn nav-btn-news" style="display:none;" onclick="openNewAppsModal()">
+          <i class="fas fa-bullhorn"></i> <span id="navNewsBtnText">新機能</span>
+        </button>
         <button class="nav-btn nav-btn-refresh" title="キャッシュをクリアして最新版に更新" onclick="forceAppRefresh()">
           <i class="fas fa-sync-alt"></i> <span>更新</span>
         </button>
@@ -1020,8 +1036,8 @@
       </div>
     </header>
 
-    <!-- 管理者ダッシュボード（管理画面モード時のみ出現） -->
-    <div id="adminDashboardPanel" class="admin-dashboard-panel">
+    <!-- 管理者ダッシュボード（管理画面モード時のみ出現・初期は確実に非表示） -->
+    <div id="adminDashboardPanel" class="admin-dashboard-panel" style="display:none;">
       <div class="admin-panel-header">
         <div class="admin-panel-title">
           <i class="fas fa-tools"></i> 管理者画面（インサート・管理操作中）
@@ -1051,13 +1067,6 @@
       </div>
     </div>
 
-    <!-- 新着アプリお知らせバナー（1週間以内） -->
-    <div id="newsBanner" class="news-banner">
-      <span class="news-badge-pill">NEW</span>
-      <div id="newsText" class="news-text">新しいアプリが追加されました！</div>
-      <button class="news-close" onclick="closeNewsBanner()"><i class="fas fa-times"></i></button>
-    </div>
-
     <!-- 検索バー・カテゴリータブ -->
     <div class="top-controls">
       <div class="search-box">
@@ -1084,10 +1093,8 @@
 
   <!-- フローティングアクションボタン (FAB) -->
   <div class="fab-container">
-    <button id="fabAdd" class="fab fab-add" title="アプリを追加（管理者のみ）" onclick="openAddModal()"><i class="fas fa-plus"></i></button>
-    <button id="fabEdit" class="fab fab-edit" title="並び替えモード（全員利用可）" onclick="toggleEditMode()"><i class="fas fa-pencil-alt"></i></button>
-    <button id="fabGroup" class="fab fab-group" title="選択したアプリをフォルダ化（管理者のみ）" onclick="groupSelectedApps()"><i class="fas fa-folder-plus"></i></button>
-    <button id="fabSettings" class="fab fab-settings" title="設定・管理者ログイン" onclick="openSettingsModal()"><i class="fas fa-cog"></i></button>
+    <button id="fabEdit" class="fab fab-edit" title="並び替えモード（全員利用可）" onclick="toggleEditMode()"><i class="fas fa-arrows-alt"></i></button>
+    <button id="fabSettings" class="fab fab-settings" title="壁紙・各種設定" onclick="openSettingsModal()"><i class="fas fa-cog"></i></button>
     <button id="fabHelp" class="fab fab-help" title="使い方ガイド" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
   </div>
 
@@ -1235,37 +1242,23 @@
     </div>
   </div>
 
-  <!-- 設定・管理者モーダル -->
+  <!-- 設定モーダル（壁紙・データ） -->
   <div id="settingsModal" class="modal-overlay" onclick="handleOverlayClick(event, 'settingsModal')">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title"><i class="fas fa-cog"></i> 設定・管理者</h3>
+        <h3 class="modal-title"><i class="fas fa-cog"></i> 設定・カスタマイズ</h3>
         <button class="modal-close-icon" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
       </div>
 
-      <!-- 管理者ログイン / ステータス -->
-      <div class="form-group" style="background:#f8fafc; padding:14px; border-radius:14px; border:1px solid #e2e8f0;">
-        <div id="adminLoginSection">
-          <label class="form-label" style="display:flex; align-items:center; gap:6px;">
-            <i class="fas fa-lock text-amber-500"></i> 管理者モードにログイン
-          </label>
-          <p style="font-size:12px; color:#64748b; margin-bottom:8px;">
-            アプリの追加・削除・編集を行うにはパスコードが必要です。
-          </p>
-          <div style="display:flex; gap:8px;">
-            <input type="password" id="adminPassInput" class="form-input" placeholder="パスコード（初期: 0800）" maxlength="10">
-            <button class="btn btn-primary" style="width:auto; white-space:nowrap; padding:0 18px;" onclick="checkAdminPassword()">ログイン</button>
-          </div>
+      <!-- 管理者モードへのショートカット案内 -->
+      <div class="form-group" style="background:#f8fafc; padding:12px; border-radius:14px; border:1px solid #e2e8f0; font-size:13px; color:#475569; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div>
+          <b style="color:#0f172a;"><i class="fas fa-shield-alt text-amber-500"></i> 管理者機能</b>
+          <div style="font-size:11px; color:#64748b; margin-top:2px;">アプリのインサート・削除は画面上部の「🔒 管理者」から行えます。</div>
         </div>
-        <div id="adminLoggedInSection" style="display:none; text-align:center;">
-          <p style="font-size:14px; font-weight:700; color:#15803d; margin-bottom:8px;">
-            <i class="fas fa-shield-alt"></i> 管理者としてログイン中
-          </p>
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-secondary" style="flex:1;" onclick="openChangePassModal()"><i class="fas fa-key"></i> パスコード変更</button>
-            <button class="btn btn-secondary" style="flex:1; color:#dc2626;" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> ログアウト</button>
-          </div>
-        </div>
+        <button type="button" class="btn btn-primary" style="width:auto; padding:6px 14px; font-size:12px; background:linear-gradient(135deg, #f59e0b, #d97706); white-space:nowrap;" onclick="closeModal('settingsModal'); openAdminLoginModal();">
+          管理者認証
+        </button>
       </div>
 
       <div class="form-group">
@@ -1388,6 +1381,20 @@
     </div>
   </div>
 
+  <!-- 新機能・新着アプリお知らせモーダル -->
+  <div id="newAppsModal" class="modal-overlay" onclick="handleOverlayClick(event, 'newAppsModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-bullhorn" style="color: #ec4899;"></i> 新機能・新着アプリのお知らせ</h3>
+        <button class="modal-close-icon" onclick="closeModal('newAppsModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="newAppsModalList" style="padding: 12px 0; display:flex; flex-direction:column; gap:12px; max-height: 60vh; overflow-y: auto;">
+        <!-- 新着アプリ一覧がここに動的生成される -->
+      </div>
+      <button type="button" class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('newAppsModal')">閉じる</button>
+    </div>
+  </div>
+
   <!-- トースト通知 -->
   <div id="toast" class="toast"></div>
 
@@ -1504,31 +1511,85 @@
       return diffMs >= 0 && diffMs <= sevenDaysMs;
     }
 
+    // ▼▼ 新機能・新着アプリ制御 ▼▼
     function checkNewAppsBanner() {
-      const isDismissed = sessionStorage.getItem('seikaen_news_dismissed');
-      if (isDismissed) return;
-
       const newApps = allApps.filter(a => isAppNew(a.createdAt));
-      const banner = document.getElementById('newsBanner');
-      const newsText = document.getElementById('newsText');
-
-      if (newApps.length > 0) {
-        const latest = newApps[0];
-        const daysLeft = Math.ceil((7 * 24 * 60 * 60 * 1000 - (Date.now() - new Date(latest.createdAt).getTime())) / (24 * 60 * 60 * 1000));
-        newsText.innerHTML = `新機能追加: <b>「${escapeHtml(latest.name)}」</b> が使えるようになりました！（新着残り ${daysLeft} 日）`;
-        newsText.style.cursor = 'pointer';
-        newsText.onclick = () => {
-          if (latest.url) window.open(latest.url, '_blank', 'noopener,noreferrer');
-        };
-        banner.classList.add('visible');
-      } else {
-        banner.classList.remove('visible');
+      const navNewsBtn = document.getElementById('navNewsBtn');
+      const navNewsBtnText = document.getElementById('navNewsBtnText');
+      if (navNewsBtn) {
+        if (newApps.length > 0) {
+          navNewsBtn.style.display = 'inline-flex';
+          if (navNewsBtnText) navNewsBtnText.textContent = `新機能 (${newApps.length})`;
+        } else {
+          navNewsBtn.style.display = 'none';
+        }
       }
     }
 
-    function closeNewsBanner() {
-      sessionStorage.setItem('seikaen_news_dismissed', 'true');
-      document.getElementById('newsBanner').classList.remove('visible');
+    function openNewAppsModal() {
+      vibrate(15);
+      const newApps = allApps.filter(a => isAppNew(a.createdAt));
+      const listEl = document.getElementById('newAppsModalList');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      if (newApps.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px 0;">現在、直近1週間の新着アプリはありません。</div>';
+      } else {
+        newApps.forEach(app => {
+          const item = document.createElement('div');
+          item.style.cssText = 'background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px;';
+          
+          const left = document.createElement('div');
+          left.style.cssText = 'display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;';
+          
+          const img = document.createElement('img');
+          img.style.cssText = 'width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: white; padding: 4px; flex-shrink: 0;';
+          img.src = app.imageData || `https://www.google.com/s2/favicons?domain=${extractDomain(app.url)}&sz=128`;
+          img.onerror = () => { img.src = 'https://raw.githubusercontent.com/rokiwo/seikaengazou/main/seikaen.png'; };
+          
+          const textDiv = document.createElement('div');
+          textDiv.style.cssText = 'overflow: hidden;';
+          const nameDiv = document.createElement('div');
+          nameDiv.style.cssText = 'font-weight: 700; font-size: 14px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+          nameDiv.textContent = app.name;
+          const catDiv = document.createElement('div');
+          catDiv.style.cssText = 'font-size: 11px; color: #fb7185; margin-top: 2px;';
+          catDiv.textContent = `カテゴリー: ${app.category || 'アプリ'} (NEW)`;
+          textDiv.appendChild(nameDiv);
+          textDiv.appendChild(catDiv);
+
+          left.appendChild(img);
+          left.appendChild(textDiv);
+
+          const openBtn = document.createElement('button');
+          openBtn.className = 'btn btn-primary';
+          openBtn.style.cssText = 'padding: 6px 14px; font-size: 12px; width: auto; white-space: nowrap; flex-shrink: 0;';
+          openBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> 開く';
+          openBtn.onclick = () => {
+            window.open(app.url, '_blank', 'noopener,noreferrer');
+          };
+
+          item.appendChild(left);
+          item.appendChild(openBtn);
+          listEl.appendChild(item);
+        });
+      }
+
+      openModal('newAppsModal');
+    }
+
+    // ▼▼ モーダル制御共通 ▼▼
+    function openModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.add('active');
+    }
+    function closeModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.remove('active');
+    }
+    function handleOverlayClick(e, modalId) {
+      if (e.target.id === modalId) closeModal(modalId);
     }
 
     // ▼▼ 管理者モード制御 ▼▼
@@ -1540,10 +1601,12 @@
       isAdmin = active;
       document.body.classList.toggle('is-admin', active);
       
-      const loginSec = document.getElementById('adminLoginSection');
-      if (loginSec) loginSec.style.display = active ? 'none' : 'block';
-      const loggedSec = document.getElementById('adminLoggedInSection');
-      if (loggedSec) loggedSec.style.display = active ? 'block' : 'none';
+      // 管理者パネルの表示・非表示をインラインで確実に強制制御
+      const panel = document.getElementById('adminDashboardPanel');
+      if (panel) {
+        panel.style.display = active ? 'block' : 'none';
+      }
+
       const promptAdd = document.getElementById('adminPromptAddBtnArea');
       if (promptAdd) promptAdd.style.display = active ? 'block' : 'none';
       const delFolderBtn = document.getElementById('btnDeleteFolder');
@@ -2514,21 +2577,13 @@
       showToast('プロンプトを削除しました');
     }
 
-    // ▼▼ モーダル制御共通 ▼▼
-    function closeModal(modalId) {
-      const el = document.getElementById(modalId);
-      if (el) el.classList.remove('active');
-    }
-    function handleOverlayClick(e, modalId) {
-      if (e.target.id === modalId) closeModal(modalId);
-    }
     function openSettingsModal() {
       vibrate(15);
-      document.getElementById('settingsModal').classList.add('active');
+      openModal('settingsModal');
     }
     function openHelpModal() {
       vibrate(15);
-      document.getElementById('helpModal').classList.add('active');
+      openModal('helpModal');
     }
 
     // ▼▼ 設定・JSONコピー & リセット ▼▼
