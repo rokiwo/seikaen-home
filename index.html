@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>清華苑用ホーム画面</title>
+
+  <!-- PWA & アイコン設定 -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a202c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="清華苑Home">
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/rokiwo/seikaengazou/main/seikaen.png">
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/rokiwo/seikaengazou/main/seikaen.png">
+
+  <!-- FontAwesome & SortableJS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent-color: #10b981;
+      --danger-color: #ef4444;
+      --star-color: #fbbf24;
+      --glass-bg: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.25);
+      --text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+      --card-radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      min-height: 100vh;
+      color: #ffffff;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      background-color: #0f172a;
+      transition: background-image 0.5s ease-in-out;
+      user-select: none;
+      -webkit-user-select: none;
+      padding-bottom: calc(90px + env(safe-area-inset-bottom, 20px));
+      overflow-x: hidden;
+    }
+
+    /* 背景用オーバーレイ（文字の視認性確保） */
+    .bg-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.55) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .main-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 16px 14px 20px 14px;
+    }
+
+    /* 検索バー＆コントロール */
+    .top-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 640px;
+      margin: 0 auto 20px auto;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 30px;
+      padding: 8px 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .search-box:focus-within {
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .search-icon {
+      color: #64748b;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      color: #1e293b;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 15px;
+      cursor: pointer;
+      padding: 4px;
+      display: none;
+    }
+
+    .clear-btn.visible {
+      display: block;
+    }
+
+    .fav-filter-btn {
+      background: #f1f5f9;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      margin-left: 8px;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .fav-filter-btn.active {
+      background: #fef3c7;
+      color: #d97706;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+      transform: scale(1.05);
+    }
+
+    /* カテゴリータブ */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 2px 8px 2px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      justify-content: flex-start;
+    }
+
+    .category-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .category-tabs {
+        justify-content: center;
+      }
+    }
+
+    .cat-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #f8fafc;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+
+    .cat-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .cat-btn.active {
+      background: #ffffff;
+      color: #1e293b;
+      border-color: #ffffff;
+      transform: scale(1.05);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      text-shadow: none;
+    }
+
+    /* アプリグリッド */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px 10px;
+      padding: 10px 4px 40px 4px;
+      min-height: 200px;
+    }
+
+    @media (min-width: 480px) {
+      .grid-container {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 24px 14px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .grid-container {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 28px 18px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid-container {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 32px 20px;
+      }
+    }
+
+    /* アプリアイテム */
+    .app-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      touch-action: manipulation;
+      transition: transform 0.15s cubic-bezier(0.2, 0, 0.1, 1);
+    }
+
+    .app-item:active {
+      transform: scale(0.92);
+    }
+
+    /* 編集モード時のプルプル揺れアニメーション */
+    .jiggle {
+      animation: jiggleAnim 0.32s infinite alternate ease-in-out;
+    }
+
+    .jiggle:nth-child(2n) {
+      animation-delay: -0.15s;
+    }
+
+    @keyframes jiggleAnim {
+      0% { transform: rotate(-2.2deg) translateY(-1px); }
+      100% { transform: rotate(2.2deg) translateY(1px); }
+    }
+
+    /* アイコンコンテナ */
+    .icon-wrapper {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (min-width: 640px) {
+      .icon-wrapper {
+        width: 68px;
+        height: 68px;
+      }
+    }
+
+    .app-icon {
+      width: 100%;
+      height: 100%;
+      border-radius: 20%;
+      object-fit: cover;
+      background: #ffffff;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    /* フォルダアイコン（iOS風 2x2 プレビュー） */
+    .folder-icon {
+      width: 100%;
+      height: 100%;
+      border-radius: 20%;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      padding: 6px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4px;
+      pointer-events: none;
+    }
+
+    .folder-mini-icon {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* アプリ名 */
+    .app-name {
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.3;
+      text-shadow: var(--text-shadow);
+      font-weight: 600;
+      margin-top: 6px;
+      width: 100%;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      pointer-events: none;
+      word-break: break-word;
+    }
+
+    @media (min-width: 640px) {
+      .app-name {
+        font-size: 12px;
+        margin-top: 7px;
+      }
+    }
+
+    /* お気に入り（★）バッジ */
+    .star-badge {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.7);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      z-index: 10;
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.2s, color 0.2s;
+    }
+
+    .star-badge.active {
+      color: var(--star-color);
+      transform: scale(1.15);
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+    }
+
+    /* 編集・削除バッジ（編集モード時に表示） */
+    .edit-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      font-size: 11px;
+      border: 2px solid white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      z-index: 20;
+      cursor: pointer;
+    }
+
+    .jiggle .edit-badge {
+      display: flex;
+    }
+
+    /* 選択状態（グループ作成用） */
+    .app-item.selected .icon-wrapper {
+      transform: scale(0.9);
+    }
+    .app-item.selected .app-icon,
+    .app-item.selected .folder-icon {
+      border: 3px solid var(--accent-color);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    }
+    .app-item.selected::after {
+      content: '\f00c';
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: -5px;
+      right: 0px;
+      background: var(--accent-color);
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      border: 2px solid white;
+      z-index: 15;
+    }
+
+    /* ドラッグ中のスタイル */
+    .sortable-ghost {
+      opacity: 0.3;
+      transform: scale(0.9);
+    }
+    .sortable-chosen {
+      opacity: 0.9;
+    }
+
+    /* フローティングアクションボタン (FAB) */
+    .fab-container {
+      position: fixed;
+      bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      right: 20px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 12px;
+      z-index: 100;
+    }
+
+    .fab {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .fab:active {
+      transform: scale(0.88);
+    }
+
+    .fab-add {
+      background: var(--primary-color);
+      color: white;
+    }
+    .fab-add:hover { background: var(--primary-hover); }
+
+    .fab-edit {
+      background: rgba(255, 255, 255, 0.95);
+      color: #334155;
+    }
+    .fab-edit.active {
+      background: #1e293b;
+      color: #f8fafc;
+      transform: rotate(360deg);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+    }
+
+    .fab-group {
+      background: var(--accent-color);
+      color: white;
+      display: none;
+    }
+    .fab-group.visible {
+      display: flex;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .fab-settings {
+      background: rgba(255, 255, 255, 0.9);
+      color: #475569;
+    }
+
+    .fab-help {
+      background: #0ea5e9;
+      color: white;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
+    /* モーダル */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 16px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-card {
+      background: rgba(255, 255, 255, 0.98);
+      color: #1e293b;
+      border-radius: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 440px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+      transform: scale(0.95) translateY(10px);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close-icon {
+      background: #f1f5f9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    /* フォームパーツ */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #1e293b;
+      background: #f8fafc;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary-color);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .form-textarea {
+      height: 90px;
+      resize: vertical;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #dc2626;
+      margin-top: 10px;
+    }
+    .btn-danger:hover { background: #fecaca; }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      margin-top: 10px;
+    }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    /* フォルダ展開モーダル */
+    .folder-view-card {
+      max-width: 520px;
+      background: rgba(248, 250, 252, 0.97);
+    }
+
+    .folder-name-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .folder-name-display {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .folder-rename-btn {
+      color: #64748b;
+      cursor: pointer;
+      font-size: 15px;
+      padding: 4px;
+    }
+
+    .folder-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px 10px;
+      min-height: 120px;
+      padding: 10px 0;
+    }
+
+    /* 空状態 */
+    .empty-message {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 10px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+      font-weight: 600;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    /* 通知トースト */
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      background: rgba(15, 23, 42, 0.92);
+      color: #ffffff;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 2000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-overlay"></div>
+
+  <div class="main-wrapper">
+    <!-- 検索バー・カテゴリータブ -->
+    <div class="top-controls">
+      <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="アプリ名・キーワードで検索..." autocomplete="off">
+        <button id="clearSearchBtn" class="clear-btn" onclick="clearSearch()"><i class="fas fa-times-circle"></i></button>
+        <button id="favToggleBtn" class="fav-filter-btn" title="お気に入りのみ表示" onclick="toggleFavFilter()"><i class="fas fa-star"></i></button>
+      </div>
+
+      <div class="category-tabs">
+        <button class="cat-btn active" data-cat="all" onclick="selectCategory('all', this)">すべて</button>
+        <button class="cat-btn" data-cat="アプリ" onclick="selectCategory('アプリ', this)">アプリ</button>
+        <button class="cat-btn" data-cat="AI" onclick="selectCategory('AI', this)">AI</button>
+        <button class="cat-btn" data-cat="マニュアル" onclick="selectCategory('マニュアル', this)">マニュアル</button>
+        <button class="cat-btn" data-cat="動画マニュアル" onclick="selectCategory('動画マニュアル', this)">動画マニュアル</button>
+        <button class="cat-btn" data-cat="その他" onclick="selectCategory('その他', this)">その他</button>
+      </div>
+    </div>
+
+    <!-- アプリグリッド -->
+    <div id="appGrid" class="grid-container"></div>
+  </div>
+
+  <!-- フローティングアクションボタン (FAB) -->
+  <div class="fab-container">
+    <button id="fabAdd" class="fab fab-add" title="アプリを追加" onclick="openAddModal()"><i class="fas fa-plus"></i></button>
+    <button id="fabEdit" class="fab fab-edit" title="並び替え・編集モード" onclick="toggleEditMode()"><i class="fas fa-pencil-alt"></i></button>
+    <button id="fabGroup" class="fab fab-group" title="選択したアプリをフォルダ化" onclick="groupSelectedApps()"><i class="fas fa-folder-plus"></i></button>
+    <button id="fabSettings" class="fab fab-settings" title="設定・データ管理" onclick="openSettingsModal()"><i class="fas fa-cog"></i></button>
+    <button id="fabHelp" class="fab fab-help" title="使い方ガイド" onclick="openHelpModal()"><i class="fas fa-question"></i></button>
+  </div>
+
+  <!-- アプリ追加・編集モーダル -->
+  <div id="appModal" class="modal-overlay" onclick="handleOverlayClick(event, 'appModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="appModalTitle" class="modal-title"><i class="fas fa-plus-circle text-blue-500"></i> アプリの登録</h3>
+        <button class="modal-close-icon" onclick="closeModal('appModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="appForm" onsubmit="saveAppForm(event)">
+        <input type="hidden" id="editAppId">
+        <input type="hidden" id="editParentFolder">
+
+        <div class="form-group">
+          <label class="form-label">アプリ名 <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="formAppName" class="form-input" placeholder="例：介護記録システム" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">URL <span style="color:#ef4444;">*</span></label>
+          <input type="url" id="formAppUrl" class="form-input" placeholder="https://..." required onchange="autoFetchFavicon(this.value)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">カテゴリー</label>
+          <select id="formAppCategory" class="form-select">
+            <option value="アプリ">アプリ</option>
+            <option value="AI">AI</option>
+            <option value="マニュアル">マニュアル</option>
+            <option value="動画マニュアル">動画マニュアル</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">検索用キーワード（ひらがな等）</label>
+          <input type="text" id="formAppDept" class="form-input" placeholder="例：かいご、きろく、しふと">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">アイコン画像（URLまたはファイル）</label>
+          <input type="text" id="formAppImage" class="form-input" placeholder="画像URL（空欄で自動取得）" style="margin-bottom:8px;">
+          <input type="file" id="formAppFile" accept="image/*" class="form-input" onchange="handleImageUpload(event)">
+          <div id="imagePreviewContainer" style="display:none; margin-top:8px; align-items:center; gap:10px;">
+            <img id="imagePreview" style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:1px solid #ccc;">
+            <span style="font-size:12px; color:#64748b;">プレビュー</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> 保存する</button>
+        <button type="button" id="btnMoveOutFolder" class="btn btn-secondary" style="display:none;" onclick="moveOutFromFolder()"><i class="fas fa-sign-out-alt"></i> このフォルダから出す</button>
+        <button type="button" id="btnDeleteApp" class="btn btn-danger" style="display:none;" onclick="deleteCurrentApp()"><i class="fas fa-trash"></i> 削除する</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- フォルダ展開モーダル -->
+  <div id="folderModal" class="modal-overlay" onclick="handleOverlayClick(event, 'folderModal')">
+    <div class="modal-card folder-view-card">
+      <div class="folder-name-header">
+        <span id="folderTitleDisplay" class="folder-name-display" onclick="renameCurrentFolder()">フォルダ名</span>
+        <i class="fas fa-pen folder-rename-btn" title="フォルダ名を変更" onclick="renameCurrentFolder()"></i>
+      </div>
+      <div id="folderAppGrid" class="folder-grid"></div>
+      <div style="margin-top:20px; display:flex; gap:10px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeModal('folderModal')">閉じる</button>
+        <button class="btn btn-danger" style="flex:1;" onclick="deleteCurrentFolder()"><i class="fas fa-trash"></i> フォルダ解除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 設定・データ管理モーダル -->
+  <div id="settingsModal" class="modal-overlay" onclick="handleOverlayClick(event, 'settingsModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-cog"></i> 設定・データ管理</h3>
+        <button class="modal-close-icon" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">壁紙テーマの選択</label>
+        <select id="wallpaperSelect" class="form-select" onchange="changeWallpaper(this.value)">
+          <option value="nature">爽やかな空と山 (デフォルト)</option>
+          <option value="sunset">夕暮れ・暖色</option>
+          <option value="night">夜空・星空</option>
+          <option value="gradient">モダン・ダークグラデーション</option>
+          <option value="clean">シンプル・ライトブルー</option>
+        </select>
+      </div>
+
+      <hr style="border:none; border-top:1px solid #e2e8f0; margin:18px 0;">
+
+      <div class="form-group">
+        <label class="form-label">現在の配置データを保存・共有</label>
+        <p style="font-size:12px; color:#64748b; margin-bottom:8px;">
+          整えたアプリ配置をコピーして、GitHubの <code>apps.json</code> に貼り付けると全員の初期配置に反映できます。
+        </p>
+        <button class="btn btn-primary" onclick="copyCurrentDataJson()"><i class="fas fa-copy"></i> 現在の配置データをコピー (JSON)</button>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <button class="btn btn-secondary" onclick="resetToMasterData()"><i class="fas fa-undo"></i> 初期状態（マスター）に戻す</button>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <button class="btn btn-secondary" style="color:#0284c7;" onclick="openReportMail()"><i class="fas fa-envelope"></i> 管理者に不具合・要望を連絡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 使い方ガイドモーダル -->
+  <div id="helpModal" class="modal-overlay" onclick="handleOverlayClick(event, 'helpModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-question-circle text-blue-500"></i> 清華苑Home の使い方</h3>
+        <button class="modal-close-icon" onclick="closeModal('helpModal')"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div style="font-size:13px; color:#334155; line-height:1.6; display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <b>🔍 検索とお気に入り</b>
+          <p>上部のバーからアプリ名やキーワード（ひらがな対応）で瞬時に検索できます。左上の★を押すとお気に入りに登録され、★ボタンで素早く絞り込めます。</p>
+        </div>
+        <div>
+          <b>📂 カテゴリー絞り込み</b>
+          <p>「アプリ」「AI」「マニュアル」などのタブを押すと、該当するアイテムが一覧で表示されます。</p>
+        </div>
+        <div>
+          <b>✏️ 並び替え・整理</b>
+          <p>右下の鉛筆ボタンを押すと編集モードになり、アイコンを長押し＆ドラッグで自由に並び替えできます。複数選択して緑のフォルダボタンを押すと、ひとつのフォルダにまとめられます。</p>
+        </div>
+        <div>
+          <b>📲 スマホのホーム画面に追加</b>
+          <p>Safariの「共有」→「ホーム画面に追加」、またはChromeの「ホーム画面に追加」を行うと、全画面の専用アプリとして起動できます。</p>
+        </div>
+      </div>
+      <button class="btn btn-secondary" style="margin-top:20px;" onclick="closeModal('helpModal')">閉じる</button>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // ▼▼ 定数・壁紙プリセット ▼▼
+    const WALLPAPERS = {
+      nature: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80',
+      sunset: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80',
+      night: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80',
+      gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+      clean: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%)'
+    };
+
+    const ADMIN_EMAIL = 'rokiwo@example.com'; // 管理者メール（必要に応じて更新）
+
+    // ▼▼ アプリ状態 ▼▼
+    let allApps = [];
+    let favApps = new Set();
+    let currentCategory = 'all';
+    let isEditing = false;
+    let selectedApps = new Set();
+    let currentOpenedFolder = null;
+    let isFavFilterOn = false;
+    let sortableInstance = null;
+    let folderSortableInstance = null;
+
+    // ▼▼ 初期化 ▼▼
+    window.addEventListener('DOMContentLoaded', async () => {
+      loadWallpaper();
+      loadFavorites();
+      await loadAppsData();
+      initServiceWorker();
+
+      // 検索入力イベント
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        document.getElementById('clearSearchBtn').classList.toggle('visible', val.length > 0);
+        renderApps();
+      });
+    });
+
+    // ▼▼ Service Worker 登録 ▼▼
+    function initServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.log('SW登録スキップ:', err);
+        });
+      }
+    }
+
+    // ▼▼ データロード（localStorage または apps.json） ▼▼
+    async function loadAppsData() {
+      const cached = localStorage.getItem('seikaen_apps_data');
+      if (cached) {
+        try {
+          allApps = JSON.parse(cached);
+          renderApps();
+          return;
+        } catch (e) {
+          console.error('キャッシュパース失敗:', e);
+        }
+      }
+
+      // 初回またはキャッシュなし時は apps.json を取得
+      try {
+        const res = await fetch('./apps.json?v=' + Date.now());
+        if (res.ok) {
+          allApps = await res.json();
+          saveAppsData();
+        }
+      } catch (err) {
+        console.warn('apps.json 読み込み失敗、空配列で開始:', err);
+        allApps = [];
+      }
+      renderApps();
+    }
+
+    function saveAppsData() {
+      localStorage.setItem('seikaen_apps_data', JSON.stringify(allApps));
+    }
+
+    // ▼▼ お気に入り読み書き ▼▼
+    function loadFavorites() {
+      const stored = localStorage.getItem('seikaen_favs');
+      if (stored) {
+        try {
+          favApps = new Set(JSON.parse(stored));
+        } catch {}
+      }
+    }
+
+    function saveFavorites() {
+      localStorage.setItem('seikaen_favs', JSON.stringify(Array.from(favApps)));
+    }
+
+    function toggleFav(id, event) {
+      event.stopPropagation();
+      vibrate(15);
+      const numId = Number(id);
+      if (favApps.has(numId)) {
+        favApps.delete(numId);
+        showToast('お気に入りを解除しました');
+      } else {
+        favApps.add(numId);
+        showToast('★ お気に入りに追加しました');
+      }
+      saveFavorites();
+      renderApps();
+    }
+
+    function toggleFavFilter() {
+      vibrate(10);
+      isFavFilterOn = !isFavFilterOn;
+      document.getElementById('favToggleBtn').classList.toggle('active', isFavFilterOn);
+      renderApps();
+    }
+
+    // ▼▼ 壁紙設定 ▼▼
+    function loadWallpaper() {
+      const saved = localStorage.getItem('seikaen_wallpaper') || 'nature';
+      setWallpaper(saved);
+      const select = document.getElementById('wallpaperSelect');
+      if (select) select.value = saved;
+    }
+
+    function changeWallpaper(theme) {
+      localStorage.setItem('seikaen_wallpaper', theme);
+      setWallpaper(theme);
+      showToast('壁紙を変更しました');
+    }
+
+    function setWallpaper(theme) {
+      const val = WALLPAPERS[theme] || WALLPAPERS.nature;
+      if (val.startsWith('linear-gradient')) {
+        document.body.style.backgroundImage = val;
+      } else {
+        document.body.style.backgroundImage = `url("${val}")`;
+      }
+    }
+
+    // ▼▼ 検索テキスト正規化（ひらがな・カタカナ両対応） ▼▼
+    function normalizeText(text) {
+      if (!text) return '';
+      let t = text.toLowerCase();
+      // カタカナをひらがなに変換
+      t = t.replace(/[\u30a1-\u30f6]/g, (m) => String.fromCharCode(m.charCodeAt(0) - 0x60));
+      return t;
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      input.value = '';
+      document.getElementById('clearSearchBtn').classList.remove('visible');
+      renderApps();
+      input.focus();
+    }
+
+    // ▼▼ カテゴリー選択 ▼▼
+    function selectCategory(cat, btn) {
+      vibrate(10);
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      if (isEditing && cat !== 'all') {
+        toggleEditMode();
+      }
+      renderApps();
+    }
+
+    // ▼▼ アプリ描画メイン ▼▼
+    function renderApps() {
+      const grid = document.getElementById('appGrid');
+      const searchText = normalizeText(document.getElementById('searchInput').value.trim());
+      grid.innerHTML = '';
+
+      let itemsToDisplay = [];
+
+      if (currentCategory !== 'all') {
+        // カテゴリー絞り込み時: フォルダを解体して該当カテゴリーのアプリをすべて一覧表示
+        allApps.forEach(app => {
+          if (app.type === 'folder') return;
+          if (app.category !== currentCategory) return;
+
+          const nameHit = normalizeText(app.name).includes(searchText);
+          const deptHit = normalizeText(app.dept).includes(searchText);
+          if (searchText && !nameHit && !deptHit) return;
+
+          if (isFavFilterOn && !favApps.has(Number(app.id))) return;
+
+          itemsToDisplay.push(app);
+        });
+      } else {
+        // 「すべて」表示時: フォルダ構造を維持して描画
+        const folderMap = new Map();
+        allApps.forEach(app => {
+          if (app.type === 'folder') {
+            folderMap.set(app.name, { ...app, children: [] });
+          }
+        });
+
+        const rootApps = [];
+        allApps.forEach(app => {
+          if (app.type !== 'folder') {
+            if (app.parent && folderMap.has(app.parent)) {
+              folderMap.get(app.parent).children.push(app);
+            } else {
+              rootApps.push(app);
+            }
+          }
+        });
+
+        // フォルダの検索・お気に入りフィルタリング
+        folderMap.forEach(folder => {
+          const folderNameHit = normalizeText(folder.name).includes(searchText);
+          const childrenHit = folder.children.some(c =>
+            normalizeText(c.name).includes(searchText) || normalizeText(c.dept).includes(searchText)
+          );
+          const hasFavChild = folder.children.some(c => favApps.has(Number(c.id)));
+
+          let show = true;
+          if (searchText && !folderNameHit && !childrenHit) show = false;
+          if (isFavFilterOn && !hasFavChild) show = false;
+          if (folder.children.length === 0 && !isEditing && !searchText) show = false;
+
+          if (show) itemsToDisplay.push(folder);
+        });
+
+        rootApps.forEach(app => {
+          let show = true;
+          const nameHit = normalizeText(app.name).includes(searchText);
+          const deptHit = normalizeText(app.dept).includes(searchText);
+
+          if (searchText && !nameHit && !deptHit) show = false;
+          if (isFavFilterOn && !favApps.has(Number(app.id))) show = false;
+
+          if (show) itemsToDisplay.push(app);
+        });
+      }
+
+      if (itemsToDisplay.length === 0) {
+        grid.innerHTML = '<div class="empty-message"><i class="fas fa-search" style="font-size:24px; margin-bottom:8px; display:block;"></i>該当するアプリは見つかりませんでした</div>';
+        return;
+      }
+
+      itemsToDisplay.forEach(item => {
+        const el = createItemElement(item, false);
+        grid.appendChild(el);
+      });
+
+      setupSortable();
+    }
+
+    // ▼▼ アイテムHTML要素の生成 ▼▼
+    function createItemElement(item, inFolder) {
+      const div = document.createElement('div');
+      div.className = isEditing ? 'app-item jiggle' : 'app-item';
+      div.dataset.id = item.id;
+
+      if (selectedApps.has(Number(item.id))) {
+        div.classList.add('selected');
+      }
+
+      const iconWrapper = document.createElement('div');
+      iconWrapper.className = 'icon-wrapper';
+
+      // ★ お気に入りバッジ（フォルダ以外）
+      if (item.type !== 'folder') {
+        const star = document.createElement('i');
+        star.className = favApps.has(Number(item.id)) ? 'fas fa-star star-badge active' : 'far fa-star star-badge';
+        star.onclick = (e) => toggleFav(item.id, e);
+        iconWrapper.appendChild(star);
+      }
+
+      // アイコン本体
+      if (item.type === 'folder') {
+        const folderDiv = document.createElement('div');
+        folderDiv.className = 'folder-icon';
+        const children = item.children || [];
+        for (let i = 0; i < 4; i++) {
+          const mini = document.createElement('div');
+          mini.className = 'folder-mini-icon';
+          const child = children[i];
+          if (child && child.imageData) {
+            mini.style.backgroundImage = `url("${child.imageData}")`;
+          } else if (child) {
+            const domain = extractDomain(child.url);
+            mini.style.backgroundImage = `url("https://www.google.com/s2/favicons?domain=${domain}&sz=64")`;
+          }
+          folderDiv.appendChild(mini);
+        }
+        iconWrapper.appendChild(folderDiv);
+      } else {
+        const img = document.createElement('img');
+        img.className = 'app-icon';
+        img.loading = 'lazy';
+
+        const fallbackFavicon = () => {
+          const domain = extractDomain(item.url);
+          img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+          img.onerror = () => {
+            img.src = 'https://raw.githubusercontent.com/rokiwo/seikaengazou/main/seikaen.png';
+          };
+        };
+
+        if (item.imageData) {
+          img.src = item.imageData;
+          img.onerror = fallbackFavicon;
+        } else {
+          fallbackFavicon();
+        }
+        iconWrapper.appendChild(img);
+      }
+
+      // 編集バッジ（鉛筆マーク）
+      const editBadge = document.createElement('div');
+      editBadge.className = 'edit-badge';
+      editBadge.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+      editBadge.onclick = (e) => {
+        e.stopPropagation();
+        vibrate(10);
+        if (item.type === 'folder') {
+          renameFolderById(item.id);
+        } else {
+          openEditModal(item.id);
+        }
+      };
+      iconWrapper.appendChild(editBadge);
+
+      div.appendChild(iconWrapper);
+
+      // アプリ名
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'app-name';
+      nameDiv.textContent = item.name;
+      div.appendChild(nameDiv);
+
+      // クリックイベント
+      div.addEventListener('click', () => {
+        handleItemClick(item, div, inFolder);
+      });
+
+      return div;
+    }
+
+    // ▼▼ アイテムクリック処理 ▼▼
+    function handleItemClick(item, el, inFolder) {
+      if (isEditing) {
+        vibrate(15);
+        const id = Number(item.id);
+        if (selectedApps.has(id)) {
+          selectedApps.delete(id);
+          el.classList.remove('selected');
+        } else {
+          selectedApps.add(id);
+          el.classList.add('selected');
+        }
+        updateGroupButton();
+      } else {
+        vibrate(10);
+        if (item.type === 'folder') {
+          openFolder(item);
+        } else {
+          window.open(item.url, '_blank', 'noopener,noreferrer');
+        }
+      }
+    }
+
+    function extractDomain(url) {
+      try {
+        return new URL(url).hostname;
+      } catch {
+        return '';
+      }
+    }
+
+    // ▼▼ SortableJS によるドラッグ並び替え ▼▼
+    function setupSortable() {
+      const grid = document.getElementById('appGrid');
+      if (sortableInstance) {
+        sortableInstance.destroy();
+        sortableInstance = null;
+      }
+
+      if (!isEditing || currentCategory !== 'all') return;
+
+      sortableInstance = new Sortable(grid, {
+        animation: 200,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        delay: 50,
+        delayOnTouchOnly: true,
+        onEnd: () => {
+          vibrate(15);
+          saveNewOrderFromDOM();
+        }
+      });
+    }
+
+    function saveNewOrderFromDOM() {
+      const items = Array.from(document.querySelectorAll('#appGrid > .app-item'));
+      const idOrder = items.map(el => Number(el.dataset.id));
+
+      const appMap = new Map();
+      allApps.forEach(a => appMap.set(Number(a.id), a));
+
+      const newAllApps = [];
+      idOrder.forEach(id => {
+        if (appMap.has(id)) {
+          newAllApps.push(appMap.get(id));
+          appMap.delete(id);
+        }
+      });
+      // 残りのアイテム（フォルダ内アプリ等）を追加
+      appMap.forEach(app => newAllApps.push(app));
+
+      allApps = newAllApps;
+      saveAppsData();
+      showToast('並び順を保存しました');
+    }
+
+    // ▼▼ 編集モード切り替え ▼▼
+    function toggleEditMode() {
+      vibrate(20);
+      if (currentCategory !== 'all' && !isEditing) {
+        selectCategory('all', document.querySelector('.cat-btn[data-cat="all"]'));
+      }
+
+      isEditing = !isEditing;
+      selectedApps.clear();
+      updateGroupButton();
+
+      const btn = document.getElementById('fabEdit');
+      btn.classList.toggle('active', isEditing);
+      btn.innerHTML = isEditing ? '<i class="fas fa-check"></i>' : '<i class="fas fa-pencil-alt"></i>';
+
+      renderApps();
+    }
+
+    // ▼▼ グループ化（フォルダ作成・移動） ▼▼
+    function updateGroupButton() {
+      const btn = document.getElementById('fabGroup');
+      if (isEditing && selectedApps.size >= 2) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    }
+
+    function groupSelectedApps() {
+      vibrate(20);
+      const selectedIds = Array.from(selectedApps);
+      const selectedItems = selectedIds.map(id => allApps.find(a => Number(a.id) === id)).filter(Boolean);
+
+      const folders = selectedItems.filter(a => a.type === 'folder');
+      if (folders.length > 1) {
+        alert('複数のフォルダをまとめることはできません。');
+        return;
+      }
+
+      if (folders.length === 1) {
+        const targetFolder = folders[0];
+        const appsToMove = selectedItems.filter(a => Number(a.id) !== Number(targetFolder.id));
+        if (confirm(`選択した ${appsToMove.length} 件のアプリを「${targetFolder.name}」フォルダに移動しますか？`)) {
+          appsToMove.forEach(app => {
+            app.parent = targetFolder.name;
+          });
+          saveAppsData();
+          toggleEditMode();
+          renderApps();
+          showToast(`フォルダ「${targetFolder.name}」に移動しました`);
+        }
+        return;
+      }
+
+      const folderName = prompt('新しいフォルダ名を入力してください:');
+      if (!folderName || !folderName.trim()) return;
+
+      const newFolder = {
+        id: Date.now(),
+        name: folderName.trim(),
+        url: '',
+        imageData: '',
+        dept: folderName.trim(),
+        type: 'folder',
+        parent: '',
+        category: 'その他'
+      };
+
+      selectedItems.forEach(app => {
+        app.parent = folderName.trim();
+      });
+
+      allApps.unshift(newFolder);
+      saveAppsData();
+      toggleEditMode();
+      renderApps();
+      showToast(`フォルダ「${newFolder.name}」を作成しました`);
+    }
+
+    // ▼▼ フォルダ展開モーダル ▼▼
+    function openFolder(folder) {
+      currentOpenedFolder = folder;
+      const modal = document.getElementById('folderModal');
+      const title = document.getElementById('folderTitleDisplay');
+      const grid = document.getElementById('folderAppGrid');
+
+      title.textContent = folder.name;
+      grid.innerHTML = '';
+
+      const children = folder.children || allApps.filter(a => a.parent === folder.name && a.type !== 'folder');
+      if (children.length === 0) {
+        grid.innerHTML = '<div class="empty-message" style="color:#64748b;">空のフォルダです</div>';
+      } else {
+        children.forEach(app => {
+          const el = createItemElement(app, true);
+          grid.appendChild(el);
+        });
+      }
+
+      modal.classList.add('active');
+
+      if (folderSortableInstance) folderSortableInstance.destroy();
+      folderSortableInstance = new Sortable(grid, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: () => {
+          vibrate(15);
+          saveAppsData();
+        }
+      });
+    }
+
+    function renameCurrentFolder() {
+      if (!currentOpenedFolder) return;
+      renameFolderById(currentOpenedFolder.id);
+    }
+
+    function renameFolderById(folderId) {
+      const folder = allApps.find(a => Number(a.id) === Number(folderId));
+      if (!folder) return;
+
+      const newName = prompt('新しいフォルダ名を入力してください:', folder.name);
+      if (!newName || !newName.trim() || newName.trim() === folder.name) return;
+
+      const oldName = folder.name;
+      folder.name = newName.trim();
+
+      // 中のアプリのparentも更新
+      allApps.forEach(app => {
+        if (app.parent === oldName) {
+          app.parent = folder.name;
+        }
+      });
+
+      saveAppsData();
+      if (currentOpenedFolder && currentOpenedFolder.id === folder.id) {
+        document.getElementById('folderTitleDisplay').textContent = folder.name;
+      }
+      renderApps();
+      showToast('フォルダ名を変更しました');
+    }
+
+    function deleteCurrentFolder() {
+      if (!currentOpenedFolder) return;
+      if (!confirm(`フォルダ「${currentOpenedFolder.name}」を解除しますか？\n（中のアプリは一覧に戻ります）`)) return;
+
+      const folderName = currentOpenedFolder.name;
+      allApps.forEach(app => {
+        if (app.parent === folderName) {
+          app.parent = '';
+        }
+      });
+
+      allApps = allApps.filter(a => Number(a.id) !== Number(currentOpenedFolder.id));
+      saveAppsData();
+      closeModal('folderModal');
+      renderApps();
+      showToast('フォルダを解除しました');
+    }
+
+    // ▼▼ アプリ追加・編集モーダル ▼▼
+    function openAddModal() {
+      vibrate(15);
+      resetAppForm();
+      document.getElementById('appModalTitle').innerHTML = '<i class="fas fa-plus-circle text-blue-500"></i> アプリの登録';
+      document.getElementById('btnDeleteApp').style.display = 'none';
+      document.getElementById('btnMoveOutFolder').style.display = 'none';
+      document.getElementById('appModal').classList.add('active');
+    }
+
+    function openEditModal(appId) {
+      const app = allApps.find(a => Number(a.id) === Number(appId));
+      if (!app) return;
+
+      resetAppForm();
+      document.getElementById('appModalTitle').innerHTML = '<i class="fas fa-pencil-alt text-blue-500"></i> アプリの編集';
+      document.getElementById('editAppId').value = app.id;
+      document.getElementById('editParentFolder').value = app.parent || '';
+      document.getElementById('formAppName').value = app.name;
+      document.getElementById('formAppUrl').value = app.url;
+      document.getElementById('formAppCategory').value = app.category || 'その他';
+      document.getElementById('formAppDept').value = app.dept || '';
+      document.getElementById('formAppImage').value = app.imageData || '';
+
+      if (app.imageData) {
+        const preview = document.getElementById('imagePreview');
+        preview.src = app.imageData;
+        document.getElementById('imagePreviewContainer').style.display = 'flex';
+      }
+
+      document.getElementById('btnDeleteApp').style.display = 'block';
+      document.getElementById('btnMoveOutFolder').style.display = app.parent ? 'block' : 'none';
+
+      document.getElementById('appModal').classList.add('active');
+    }
+
+    function resetAppForm() {
+      document.getElementById('appForm').reset();
+      document.getElementById('editAppId').value = '';
+      document.getElementById('editParentFolder').value = '';
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+    }
+
+    function autoFetchFavicon(url) {
+      const imgInput = document.getElementById('formAppImage');
+      if (!imgInput.value.trim() && url) {
+        const domain = extractDomain(url);
+        if (domain) {
+          imgInput.value = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+          const preview = document.getElementById('imagePreview');
+          preview.src = imgInput.value;
+          document.getElementById('imagePreviewContainer').style.display = 'flex';
+        }
+      }
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 160;
+          let w = img.width, h = img.height;
+          if (w > h) { if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; } }
+          else { if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; } }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+
+          document.getElementById('formAppImage').value = compressed;
+          document.getElementById('imagePreview').src = compressed;
+          document.getElementById('imagePreviewContainer').style.display = 'flex';
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveAppForm(e) {
+      e.preventDefault();
+      vibrate(15);
+
+      const id = document.getElementById('editAppId').value;
+      const name = document.getElementById('formAppName').value.trim();
+      const url = document.getElementById('formAppUrl').value.trim();
+      const category = document.getElementById('formAppCategory').value;
+      const dept = document.getElementById('formAppDept').value.trim();
+      const imageData = document.getElementById('formAppImage').value.trim();
+      const parent = document.getElementById('editParentFolder').value;
+
+      if (!name || !url) {
+        alert('アプリ名とURLは必須です');
+        return;
+      }
+
+      if (id) {
+        // 更新
+        const target = allApps.find(a => Number(a.id) === Number(id));
+        if (target) {
+          target.name = name;
+          target.url = url;
+          target.category = category;
+          target.dept = dept;
+          target.imageData = imageData;
+        }
+        showToast('アプリ情報を更新しました');
+      } else {
+        // 新規登録
+        const newApp = {
+          id: Date.now(),
+          name,
+          url,
+          imageData,
+          dept,
+          type: 'app',
+          parent: '',
+          category
+        };
+        allApps.unshift(newApp);
+        showToast('新しいアプリを登録しました');
+      }
+
+      saveAppsData();
+      closeModal('appModal');
+      renderApps();
+    }
+
+    function moveOutFromFolder() {
+      const id = document.getElementById('editAppId').value;
+      const target = allApps.find(a => Number(a.id) === Number(id));
+      if (!target) return;
+
+      if (confirm(`「${target.name}」をフォルダから外に出しますか？`)) {
+        target.parent = '';
+        saveAppsData();
+        closeModal('appModal');
+        closeModal('folderModal');
+        renderApps();
+        showToast('フォルダから移動しました');
+      }
+    }
+
+    function deleteCurrentApp() {
+      const id = document.getElementById('editAppId').value;
+      const target = allApps.find(a => Number(a.id) === Number(id));
+      if (!target) return;
+
+      if (confirm(`アプリ「${target.name}」を削除しますか？`)) {
+        allApps = allApps.filter(a => Number(a.id) !== Number(id));
+        favApps.delete(Number(id));
+        saveFavorites();
+        saveAppsData();
+        closeModal('appModal');
+        closeModal('folderModal');
+        renderApps();
+        showToast('アプリを削除しました');
+      }
+    }
+
+    // ▼▼ モーダル制御共通 ▼▼
+    function closeModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.remove('active');
+    }
+
+    function handleOverlayClick(e, modalId) {
+      if (e.target.id === modalId) {
+        closeModal(modalId);
+      }
+    }
+
+    function openSettingsModal() {
+      vibrate(15);
+      document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function openHelpModal() {
+      vibrate(15);
+      document.getElementById('helpModal').classList.add('active');
+    }
+
+    // ▼▼ 設定・JSONコピー & リセット ▼▼
+    function copyCurrentDataJson() {
+      vibrate(15);
+      const jsonStr = JSON.stringify(allApps, null, 2);
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        showToast('クリップボードにJSONをコピーしました！');
+      }).catch(() => {
+        prompt('以下のJSONをコピーしてください:', jsonStr);
+      });
+    }
+
+    async function resetToMasterData() {
+      if (!confirm('初期のマスターデータ（apps.json）に戻しますか？\n※自身で追加・並び替えた内容はリセットされます。')) return;
+      localStorage.removeItem('seikaen_apps_data');
+      await loadAppsData();
+      closeModal('settingsModal');
+      showToast('初期状態にリセットしました');
+    }
+
+    function openReportMail() {
+      const subject = encodeURIComponent('【清華苑アプリポータル】不具合・改善要望');
+      const body = encodeURIComponent('アプリ名:\n内容:\n\n---\n端末環境: ' + navigator.userAgent);
+      window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
+    }
+
+    // ▼▼ 触覚フィードバック & トースト ▼▼
+    function vibrate(ms) {
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(ms); } catch {}
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2200);
+    }
+  </script>
+</body>
+</html>
