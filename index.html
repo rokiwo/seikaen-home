@@ -305,27 +305,143 @@
       letter-spacing: 0.5px;
     }
 
-    /* 新着アプリお知らせバナー（1週間以内） */
-    .news-banner {
-      display: none;
-      background: rgba(236, 72, 153, 0.25);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(236, 72, 153, 0.45);
-      border-radius: 18px;
-      padding: 10px 16px;
-      margin-bottom: 14px;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 16px rgba(236, 72, 153, 0.2);
-      animation: slideDown 0.3s ease;
-    }
-    .news-banner.visible {
+    /* PC用トップバー・時計・クイックボタン共通 */
+    .top-nav-left {
       display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .top-nav-clock {
+      display: none;
+    }
+    .nav-btn-pc-only {
+      display: none;
+    }
+    .pc-search-badge {
+      display: none;
+    }
+
+    /* ▼▼ PC・タブレット大画面向けレスポンシブ拡張 (1024px以上) ▼▼ */
+    @media (min-width: 1024px) {
+      .main-wrapper {
+        max-width: 1320px;
+        padding: 16px 36px 48px 36px;
+      }
+      .top-nav-bar {
+        padding: 8px 0 16px 0;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .top-nav-logo {
+        font-size: 23px;
+        font-weight: 800;
+      }
+      .top-nav-clock {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #e2e8f0;
+        background: rgba(15, 23, 42, 0.65);
+        padding: 6px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(8px);
+      }
+      .nav-btn-pc-only {
+        display: inline-flex !important;
+      }
+
+      /* PC用検索バー＆カテゴリータブ */
+      .top-controls {
+        max-width: 800px;
+        margin: 0 auto 24px auto;
+      }
+      .search-box {
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+        padding: 8px 16px;
+      }
+      .search-input {
+        font-size: 16px;
+      }
+      .pc-search-badge {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        font-weight: bold;
+        color: #94a3b8;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 6px;
+        margin-right: 6px;
+        cursor: default;
+        user-select: none;
+      }
+      .category-tabs {
+        justify-content: center;
+        flex-wrap: wrap;
+        padding-bottom: 0;
+        gap: 8px;
+      }
+      .cat-btn {
+        padding: 8px 20px;
+        font-size: 13.5px;
+      }
+      .ai-prompt-tab-btn {
+        padding: 8px 20px;
+        font-size: 13.5px;
+      }
+
+      /* PC用アプリアイコングリッド（広々並び・ホバーエフェクト） */
+      .grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)) !important;
+        gap: 32px 20px;
+        padding: 20px 0 60px 0;
+      }
+      .icon-wrapper {
+        width: 76px !important;
+        height: 76px !important;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .app-item {
+        cursor: pointer;
+      }
+      .app-item:hover .icon-wrapper {
+        transform: translateY(-6px) scale(1.08);
+      }
+      .app-item:hover .app-icon {
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+        border-color: rgba(255, 255, 255, 0.9);
+      }
+      .app-name {
+        font-size: 13px !important;
+        max-width: 108px !important;
+        margin-top: 8px !important;
+        line-height: 1.35;
+      }
+      /* PC用モーダル拡張（大画面で横長にゆったり） */
+      #promptModal .modal-card {
+        max-width: 780px !important;
+      }
+      #promptList {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        max-height: 52vh !important;
+      }
+      #statsModal .modal-card {
+        max-width: 680px !important;
+      }
+      /* PC用FAB */
+      .fab-container {
+        bottom: 32px;
+        right: 32px;
+      }
     }
     .news-badge-pill {
       background: linear-gradient(135deg, #ec4899, #f43f5e);
@@ -1057,13 +1173,27 @@
   <div class="bg-overlay"></div>
 
   <div class="main-wrapper">
-    <!-- 1段目：タイトルと管理者ボタン（上にスッキリ1段で横並び） -->
+    <!-- 1段目：タイトルと管理者ボタン（上にスッキリ1段で横並び・PCは大画面ナビ展開） -->
     <header class="top-nav-bar">
-      <div class="top-nav-logo">
-        <i class="fas fa-home" style="color:#60a5fa;"></i>
-        <span>清華苑 ポータル</span>
+      <div class="top-nav-left">
+        <div class="top-nav-logo">
+          <i class="fas fa-home" style="color:#60a5fa;"></i>
+          <span>清華苑 ポータル</span>
+        </div>
+        <div id="pcClock" class="top-nav-clock" title="現在日時"></div>
       </div>
       <div class="top-nav-actions">
+        <!-- PC大画面時に直接ワンクリックできるクイックボタン -->
+        <button class="nav-btn nav-btn-pc-only" title="AIプロンプト集を開く" onclick="openPromptGalleryModal()">
+          <i class="fas fa-wand-magic-sparkles" style="color:#c084fc;"></i> <span>AIプロンプト</span>
+        </button>
+        <button class="nav-btn nav-btn-pc-only" title="利用統計を見る" onclick="openStatsModal()">
+          <i class="fas fa-chart-bar" style="color:#38bdf8;"></i> <span>利用統計</span>
+        </button>
+        <button class="nav-btn nav-btn-pc-only" title="壁紙・各種設定" onclick="openSettingsModal()">
+          <i class="fas fa-cog"></i> <span>設定</span>
+        </button>
+        <!-- 共通ボタン -->
         <button class="nav-btn nav-btn-refresh" title="キャッシュをクリアして最新版に更新" onclick="forceAppRefresh()">
           <i class="fas fa-sync-alt"></i> <span>更新</span>
         </button>
@@ -1121,6 +1251,7 @@
       <div class="search-box">
         <i class="fas fa-search search-icon"></i>
         <input type="text" id="searchInput" class="search-input" placeholder="アプリ名・キーワードで検索..." autocomplete="off">
+        <span class="pc-search-badge" title="キーボードの「/」で検索バーにフォーカス">/</span>
         <button id="clearSearchBtn" class="clear-btn" onclick="clearSearch()"><i class="fas fa-times-circle"></i></button>
         <button id="favToggleBtn" class="fav-filter-btn" title="お気に入りのみ表示" onclick="toggleFavFilter()"><i class="fas fa-star"></i></button>
       </div>
@@ -1566,12 +1697,52 @@
       await Promise.all([loadAppsData(), loadPromptsData()]);
       initServiceWorker();
 
+      // PC時計の初回実行と定期更新
+      updateClock();
+      setInterval(updateClock, 30000);
+
       // 検索入力イベント
       document.getElementById('searchInput').addEventListener('input', (e) => {
         const val = e.target.value.trim();
         document.getElementById('clearSearchBtn').classList.toggle('visible', val.length > 0);
         renderApps();
       });
+    });
+
+    // PC用リアルタイム時計表示
+    function updateClock() {
+      const clockEl = document.getElementById('pcClock');
+      if (!clockEl) return;
+      const now = new Date();
+      const days = ['日', '月', '火', '水', '木', '金', '土'];
+      const m = now.getMonth() + 1;
+      const d = now.getDate();
+      const day = days[now.getDay()];
+      const h = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      clockEl.innerHTML = `<i class="far fa-calendar-alt" style="color:#60a5fa;"></i> ${m}月${d}日(${day}) <i class="far fa-clock" style="color:#38bdf8; margin-left:6px;"></i> ${h}:${min}`;
+    }
+
+    // PC向けキーボードショートカット
+    window.addEventListener('keydown', (e) => {
+      // Escキーで開いているモーダルを閉じる
+      if (e.key === 'Escape') {
+        const activeModals = document.querySelectorAll('.modal-overlay.active');
+        if (activeModals.length > 0) {
+          activeModals.forEach(m => m.classList.remove('active'));
+          e.preventDefault();
+          return;
+        }
+      }
+      // '/' キーで検索バーにフォーカス（ただしテキスト入力・編集中でない場合）
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+          searchInput.select();
+        }
+      }
     });
 
     function initServiceWorker() {
