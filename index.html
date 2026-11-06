@@ -76,10 +76,10 @@
       display: none;
       background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.96));
       border: 1.5px solid #f59e0b;
-      border-radius: 20px;
-      padding: 16px 16px;
-      margin-bottom: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      border-radius: 18px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
       animation: fadeIn 0.25s ease;
       width: 100%;
       box-sizing: border-box;
@@ -92,30 +92,30 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
     .admin-panel-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: #fbbf24;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
     .btn-exit-admin {
       background: #ef4444;
       color: white;
       border: none;
-      padding: 7px 16px;
-      border-radius: 12px;
-      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
       transition: all 0.2s;
     }
@@ -124,56 +124,67 @@
       transform: translateY(-1px);
     }
 
-    /* インサートボタングリッド */
+    /* 管理メニューグリッド（5項目対応） */
     .admin-actions-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
     }
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
+      .admin-actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+    }
+    @media (max-width: 380px) {
       .admin-actions-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        gap: 6px;
       }
     }
     .admin-action-btn {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
-      padding: 12px 6px;
-      border-radius: 14px;
-      font-size: 12px;
+      padding: 10px 4px;
+      border-radius: 12px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       transition: all 0.2s;
       text-align: center;
-      line-height: 1.3;
+      line-height: 1.25;
     }
     .admin-action-btn:active {
       transform: scale(0.95);
     }
     .admin-action-btn i {
-      font-size: 20px;
+      font-size: 18px;
     }
     .admin-action-btn.btn-insert-app {
       background: linear-gradient(135deg, #3b82f6, #2563eb);
       border-color: #60a5fa;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
     .admin-action-btn.btn-bulk-import {
       background: linear-gradient(135deg, #10b981, #059669);
       border-color: #34d399;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
     .admin-action-btn.btn-insert-prompt {
       background: linear-gradient(135deg, #8b5cf6, #7c3aed);
       border-color: #a78bfa;
-      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    .admin-action-btn.btn-stats {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border-color: #38bdf8;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
     }
 
     .main-wrapper {
@@ -182,73 +193,65 @@
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
-      padding: 12px 14px 24px 14px;
+      padding: 6px 12px 20px 12px; /* 余白を詰めて間延びを完全防止 */
       box-sizing: border-box;
       overflow-x: hidden;
     }
 
-    /* トップナビゲーションバー */
+    /* 1段目：タイトルと管理者ボタン（上にスッキリ1段で横並び） */
     .top-nav-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 2px 12px 2px;
+      padding: 2px 0 6px 0;
       margin-bottom: 2px;
+      width: 100%;
     }
     .top-nav-logo {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 800;
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       text-shadow: var(--text-shadow);
       color: #ffffff;
+      white-space: nowrap;
     }
     .top-nav-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-shrink: 0;
     }
     .nav-btn {
       background: rgba(15, 23, 42, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.25);
       color: #ffffff;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      white-space: nowrap;
     }
     .nav-btn:active {
       transform: scale(0.95);
     }
     .nav-btn-refresh {
       color: #cbd5e1;
+      padding: 5px 8px;
     }
     .nav-btn-refresh:hover {
       color: #38bdf8;
       border-color: #38bdf8;
-    }
-    .nav-btn-news {
-      background: rgba(236, 72, 153, 0.25);
-      border-color: rgba(236, 72, 153, 0.6);
-      color: #f472b6;
-      animation: pulseNews 2s infinite ease-in-out;
-    }
-    .nav-btn-news:hover {
-      background: rgba(236, 72, 153, 0.45);
-    }
-    @keyframes pulseNews {
-      0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25); }
-      50% { transform: scale(1.04); box-shadow: 0 4px 16px rgba(236, 72, 153, 0.5); }
     }
     .nav-btn-admin {
       background: rgba(245, 158, 11, 0.25);
@@ -263,6 +266,43 @@
       border-color: #ef4444;
       color: #ffffff;
       box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+
+    /* 2段目：新機能バー（新機能がある時だけコンパクトに出現・間延びゼロ） */
+    .sub-news-bar {
+      display: none;
+      margin-bottom: 6px;
+      animation: fadeIn 0.2s ease;
+    }
+    .sub-news-pill {
+      width: 100%;
+      background: linear-gradient(90deg, rgba(236, 72, 153, 0.25), rgba(168, 85, 247, 0.25));
+      border: 1px solid rgba(244, 114, 182, 0.4);
+      border-radius: 12px;
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(236, 72, 153, 0.15);
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+    .sub-news-pill:active {
+      transform: scale(0.98);
+    }
+    .sub-news-badge {
+      background: #ec4899;
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
     }
 
     /* 新着アプリお知らせバナー（1週間以内） */
@@ -1017,30 +1057,35 @@
   <div class="bg-overlay"></div>
 
   <div class="main-wrapper">
-    <!-- トップナビゲーションバー（ロゴ・新機能・最新更新・管理者ログイン切替） -->
+    <!-- 1段目：タイトルと管理者ボタン（上にスッキリ1段で横並び） -->
     <header class="top-nav-bar">
       <div class="top-nav-logo">
         <i class="fas fa-home" style="color:#60a5fa;"></i>
         <span>清華苑 ポータル</span>
       </div>
       <div class="top-nav-actions">
-        <button id="navNewsBtn" class="nav-btn nav-btn-news" style="display:none;" onclick="openNewAppsModal()">
-          <i class="fas fa-bullhorn"></i> <span id="navNewsBtnText">新機能</span>
-        </button>
         <button class="nav-btn nav-btn-refresh" title="キャッシュをクリアして最新版に更新" onclick="forceAppRefresh()">
           <i class="fas fa-sync-alt"></i> <span>更新</span>
         </button>
-        <button id="navAdminBtn" class="nav-btn nav-btn-admin" title="管理者モードにログイン（0800）" onclick="handleNavAdminClick()">
+        <button id="navAdminBtn" class="nav-btn nav-btn-admin" title="管理者モード（0800）" onclick="handleNavAdminClick()">
           <i class="fas fa-lock"></i> <span id="navAdminBtnText">管理者</span>
         </button>
       </div>
     </header>
 
+    <!-- 2段目：新機能お知らせ（新機能がある時だけコンパクトに出現・間延び防止） -->
+    <div id="subNewsBar" class="sub-news-bar">
+      <div class="sub-news-pill" onclick="openNewAppsModal()">
+        <span><i class="fas fa-bullhorn" style="color:#f472b6; margin-right:6px;"></i><span id="subNewsText">新機能アプリが追加されました！</span></span>
+        <span class="sub-news-badge">NEW</span>
+      </div>
+    </div>
+
     <!-- 管理者ダッシュボード（管理画面モード時のみ出現・初期は確実に非表示） -->
     <div id="adminDashboardPanel" class="admin-dashboard-panel" style="display:none;">
       <div class="admin-panel-header">
         <div class="admin-panel-title">
-          <i class="fas fa-tools"></i> 管理者画面（インサート・管理操作中）
+          <i class="fas fa-tools"></i> 管理者メニュー（アプリ登録・編集）
         </div>
         <button class="btn-exit-admin" onclick="logoutAdmin()">
           <i class="fas fa-arrow-left"></i> 一般画面に戻る
@@ -1050,15 +1095,19 @@
       <div class="admin-actions-grid">
         <button class="admin-action-btn btn-insert-app" onclick="openAddModal()">
           <i class="fas fa-plus-circle"></i>
-          <span>アプリをインサート<br>（新規登録）</span>
+          <span>アプリ追加<br>（新規登録）</span>
         </button>
         <button class="admin-action-btn btn-bulk-import" onclick="openBulkImportModal()">
           <i class="fas fa-file-import"></i>
-          <span>JSONを一括<br>インサート</span>
+          <span>JSONを一括<br>登録</span>
         </button>
         <button class="admin-action-btn btn-insert-prompt" onclick="openNewPromptForm()">
           <i class="fas fa-wand-magic-sparkles"></i>
-          <span>プロンプトを<br>インサート</span>
+          <span>プロンプト<br>追加</span>
+        </button>
+        <button class="admin-action-btn btn-stats" onclick="openStatsModal()">
+          <i class="fas fa-chart-bar" style="color:#38bdf8;"></i>
+          <span>どれだけ使われたか<br>（利用統計）</span>
         </button>
         <button class="admin-action-btn" onclick="openChangePassModal()">
           <i class="fas fa-key"></i>
@@ -1366,7 +1415,7 @@
       </div>
       <div style="padding: 10px 0;">
         <p style="font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-          アプリの登録（インサート）や削除を行うには、管理者パスコードを入力してください。
+          アプリの追加（登録）や削除を行うには、管理者パスコードを入力してください。
         </p>
         <div class="form-group" style="margin-bottom: 20px;">
           <input type="password" id="dedicatedAdminPassInput" class="form-input" placeholder="パスコード（初期: 0800）" inputmode="numeric" pattern="[0-9]*" style="font-size: 22px; letter-spacing: 6px; text-align: center; height: 50px; font-weight: bold;" onkeydown="if(event.key==='Enter') checkDedicatedAdminPassword()">
@@ -1392,6 +1441,32 @@
         <!-- 新着アプリ一覧がここに動的生成される -->
       </div>
       <button type="button" class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('newAppsModal')">閉じる</button>
+    </div>
+  </div>
+
+  <!-- アプリ利用統計モーダル（どれだけ使われたか） -->
+  <div id="statsModal" class="modal-overlay" onclick="handleOverlayClick(event, 'statsModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-chart-bar" style="color: #0284c7;"></i> アプリ利用統計（使われた回数）</h3>
+        <button class="modal-close-icon" onclick="closeModal('statsModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="padding: 10px 0;">
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px; line-height: 1.5;">
+          各アプリが実際に開かれた（クリックされた）累計回数の集計データです。<br>現場でよく使われている順に並びます。
+        </p>
+        <div style="background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.2); border-radius: 12px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 13px; font-weight: 700; color: #0284c7;">全アプリ総アクセス数</span>
+          <span id="totalUsageCount" style="font-size: 20px; font-weight: 900; color: #0369a1;">0 回</span>
+        </div>
+        <div id="statsModalList" style="display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto;">
+          <!-- 統計バーリストが動的生成される -->
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="resetUsageStats()"><i class="fas fa-undo"></i> 統計をリセット</button>
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal('statsModal')">閉じる</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1511,17 +1586,19 @@
       return diffMs >= 0 && diffMs <= sevenDaysMs;
     }
 
-    // ▼▼ 新機能・新着アプリ制御 ▼▼
+    // ▼▼ 新機能・新着アプリ制御（2段目で間延びゼロ） ▼▼
     function checkNewAppsBanner() {
       const newApps = allApps.filter(a => isAppNew(a.createdAt));
-      const navNewsBtn = document.getElementById('navNewsBtn');
-      const navNewsBtnText = document.getElementById('navNewsBtnText');
-      if (navNewsBtn) {
+      const subNewsBar = document.getElementById('subNewsBar');
+      const subNewsText = document.getElementById('subNewsText');
+      if (subNewsBar) {
         if (newApps.length > 0) {
-          navNewsBtn.style.display = 'inline-flex';
-          if (navNewsBtnText) navNewsBtnText.textContent = `新機能 (${newApps.length})`;
+          subNewsBar.style.display = 'block';
+          if (subNewsText) {
+            subNewsText.textContent = `新機能アプリ: 「${escapeHtml(newApps[0].name)}」が利用可能です（計 ${newApps.length} 件）`;
+          }
         } else {
-          navNewsBtn.style.display = 'none';
+          subNewsBar.style.display = 'none';
         }
       }
     }
@@ -1567,6 +1644,7 @@
           openBtn.style.cssText = 'padding: 6px 14px; font-size: 12px; width: auto; white-space: nowrap; flex-shrink: 0;';
           openBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> 開く';
           openBtn.onclick = () => {
+            trackAppUsage(app.id);
             window.open(app.url, '_blank', 'noopener,noreferrer');
           };
 
@@ -1577,6 +1655,98 @@
       }
 
       openModal('newAppsModal');
+    }
+
+    // ▼▼ どれだけ使われたか（利用統計）制御 ▼▼
+    function getAppUsageData() {
+      try {
+        return JSON.parse(localStorage.getItem('seikaen_app_usage') || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function trackAppUsage(appId) {
+      if (!appId) return;
+      const data = getAppUsageData();
+      data[appId] = (data[appId] || 0) + 1;
+      localStorage.setItem('seikaen_app_usage', JSON.stringify(data));
+    }
+
+    function openStatsModal() {
+      vibrate(15);
+      const usage = getAppUsageData();
+      const listEl = document.getElementById('statsModalList');
+      const totalCountEl = document.getElementById('totalUsageCount');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      let totalClicks = 0;
+      const appStats = allApps
+        .filter(a => a.type !== 'folder')
+        .map(app => {
+          const count = usage[app.id] || 0;
+          totalClicks += count;
+          return { ...app, count };
+        });
+
+      if (totalCountEl) totalCountEl.textContent = `${totalClicks.toLocaleString()} 回`;
+
+      appStats.sort((a, b) => b.count - a.count);
+      const maxCount = Math.max(...appStats.map(s => s.count), 1);
+
+      if (appStats.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px 0;">アプリが登録されていません。</div>';
+      } else {
+        appStats.forEach((app, idx) => {
+          const pct = Math.round((app.count / maxCount) * 100);
+          const row = document.createElement('div');
+          row.style.cssText = 'background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px;';
+
+          const topRow = document.createElement('div');
+          topRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700;';
+
+          const left = document.createElement('div');
+          left.style.cssText = 'display: flex; align-items: center; gap: 8px; overflow: hidden;';
+          
+          const rankBadge = document.createElement('span');
+          rankBadge.style.cssText = `font-size: 11px; font-weight: 800; padding: 1px 6px; border-radius: 6px; ${idx === 0 ? 'background:#f59e0b; color:black;' : idx === 1 ? 'background:#94a3b8; color:black;' : idx === 2 ? 'background:#b45309; color:white;' : 'background:rgba(255,255,255,0.1); color:#cbd5e1;'}`;
+          rankBadge.textContent = `${idx + 1}位`;
+
+          const nameSpan = document.createElement('span');
+          nameSpan.style.cssText = 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white;';
+          nameSpan.textContent = app.name;
+
+          left.appendChild(rankBadge);
+          left.appendChild(nameSpan);
+
+          const countSpan = document.createElement('span');
+          countSpan.style.cssText = 'font-size: 14px; font-weight: 800; color: #38bdf8; white-space: nowrap; margin-left: 8px;';
+          countSpan.textContent = `${app.count} 回`;
+
+          topRow.appendChild(left);
+          topRow.appendChild(countSpan);
+
+          const barBg = document.createElement('div');
+          barBg.style.cssText = 'background: rgba(255, 255, 255, 0.1); border-radius: 4px; height: 6px; width: 100%; overflow: hidden;';
+          const barFill = document.createElement('div');
+          barFill.style.cssText = `background: linear-gradient(90deg, #38bdf8, #0284c7); height: 100%; width: ${pct}%; border-radius: 4px; transition: width 0.3s;`;
+          barBg.appendChild(barFill);
+
+          row.appendChild(topRow);
+          row.appendChild(barBg);
+          listEl.appendChild(row);
+        });
+      }
+
+      openModal('statsModal');
+    }
+
+    function resetUsageStats() {
+      if (!confirm('利用統計（使われた回数）のデータをリセットしますか？')) return;
+      localStorage.removeItem('seikaen_app_usage');
+      openStatsModal();
+      showToast('利用統計をリセットしました');
     }
 
     // ▼▼ モーダル制御共通 ▼▼
@@ -2060,6 +2230,7 @@
         if (item.type === 'folder') {
           openFolder(item);
         } else {
+          trackAppUsage(item.id);
           window.open(item.url, '_blank', 'noopener,noreferrer');
         }
       }
