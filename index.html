@@ -1238,8 +1238,8 @@
         <button class="modal-close-icon" onclick="closeModal('promptModal')"><i class="fas fa-times"></i></button>
       </div>
 
-      <div style="margin-bottom:12px;">
-        <input type="text" id="promptSearchInput" class="form-input" placeholder="実現したいこと・キーワードで探す..." oninput="renderPrompts()">
+      <div style="margin-bottom:12px; position:relative;">
+        <input type="text" id="promptSearchInput" class="form-input" placeholder="こんなことしたい・キーワードで探す（例: ひやりはっと、申し送り、家族連絡...）" oninput="renderPrompts()">
       </div>
 
       <div id="promptCatTabs" class="category-tabs" style="margin-bottom:14px;">
@@ -1286,8 +1286,68 @@
             <i class="fas fa-robot"></i> ChatGPTで開く
           </button>
         </div>
-        <button id="btnDeletePrompt" class="btn btn-danger" style="display:none;" onclick="deleteCurrentPrompt()"><i class="fas fa-trash"></i> このプロンプトを削除（管理者）</button>
+        <div style="display:flex; gap:8px;">
+          <button id="btnEditPrompt" class="btn btn-secondary" style="flex:1; display:none; border-color:#8b5cf6; color:#7c3aed;" onclick="editCurrentPrompt()"><i class="fas fa-pencil-alt"></i> このプロンプトを編集（管理者）</button>
+          <button id="btnDeletePrompt" class="btn btn-danger" style="flex:1; display:none;" onclick="deleteCurrentPrompt()"><i class="fas fa-trash"></i> 削除（管理者）</button>
+        </div>
       </div>
+    </div>
+  </div>
+
+  <!-- AIプロンプト作成・編集モーダル（Gems風1画面フォーム） -->
+  <div id="promptFormModal" class="modal-overlay" onclick="handleOverlayClick(event, 'promptFormModal')">
+    <div class="modal-card" style="max-width:560px;">
+      <div class="modal-header">
+        <h3 id="promptFormModalTitle" class="modal-title"><i class="fas fa-gem" style="color:#8b5cf6;"></i> AIプロンプトの作成</h3>
+        <button class="modal-close-icon" onclick="closeModal('promptFormModal')"><i class="fas fa-times"></i></button>
+      </div>
+
+      <form id="promptCreateEditForm" onsubmit="savePromptForm(event)">
+        <input type="hidden" id="promptFormEditId">
+
+        <div class="form-group">
+          <label class="form-label">プロンプト名（タイトル） <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="promptFormTitle" class="form-input" placeholder="例：箇条書きメモから丁寧な介護記録を作成" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">カテゴリー <span style="color:#ef4444;">*</span></label>
+          <select id="promptFormCategory" class="form-select" required>
+            <option value="介護記録・申し送り">介護記録・申し送り</option>
+            <option value="安全管理・報告書">安全管理・報告書（ヒヤリハット・事故）</option>
+            <option value="ご家族対応">ご家族対応（連絡帳・お手紙）</option>
+            <option value="レクリエーション">レクリエーション企画</option>
+            <option value="研修・マニュアル">研修・マニュアル作成</option>
+            <option value="業務効率化">業務効率化・文章作成</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">こんなことをしたい（目的・利用シーン） <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="promptFormTarget" class="form-input" placeholder="例：メモ書きから客観的で丁寧な介護経過記録（SOAP形式）を作成したい" required>
+          <span style="font-size:11px; color:#64748b; margin-top:3px; display:block;">
+            ※ユーザーが「こんなことしたい」と曖昧検索した時にヒットする重要な説明文です。
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">検索キーワード・タグ（カンマ区切り・任意）</label>
+          <input type="text" id="promptFormTags" class="form-input" placeholder="例：ひやりはっと, 経過記録, SOAP, メモ, 申し送り, 要約">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">AIへの指示プロンプト本文（テンプレート） <span style="color:#ef4444;">*</span></label>
+          <textarea id="promptFormTemplate" class="form-textarea" style="height:140px; font-size:13px; font-family:monospace; line-height:1.5;" placeholder="AIに指示する役割やルール、出力フォーマットを記述してください..." required></textarea>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeModal('promptFormModal')">キャンセル</button>
+          <button type="submit" class="btn btn-primary" style="flex:1.5; background:linear-gradient(135deg, #8b5cf6, #7c3aed); font-weight:700;">
+            <i class="fas fa-check"></i> プロンプトを保存
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -2633,11 +2693,11 @@
       }
     }
 
-    // ▼▼ AIプロンプトギャラリー制御 ▼▼
+    // ▼▼ AIプロンプトギャラリー制御（曖昧検索・説明文全文検索対応） ▼▼
     function openPromptGalleryModal() {
       vibrate(15);
       renderPrompts();
-      document.getElementById('promptModal').classList.add('active');
+      openModal('promptModal');
     }
 
     function filterPromptCat(cat, btn) {
@@ -2650,23 +2710,40 @@
 
     function renderPrompts() {
       const container = document.getElementById('promptList');
-      const query = normalizeText(document.getElementById('promptSearchInput').value.trim());
+      const rawQuery = document.getElementById('promptSearchInput').value.trim();
       container.innerHTML = '';
 
       let list = allPrompts;
       if (currentPromptCategory !== 'all') {
         list = list.filter(p => p.category === currentPromptCategory);
       }
-      if (query) {
-        list = list.filter(p =>
-          normalizeText(p.title).includes(query) ||
-          normalizeText(p.target).includes(query) ||
-          normalizeText(p.template).includes(query)
-        );
+
+      if (rawQuery) {
+        // スペース（全角・半角）で分割し、マルチキーワードAND検索（曖昧検索）
+        const keywords = rawQuery.split(/[\s　]+/).filter(Boolean).map(k => normalizeText(k));
+        
+        list = list.filter(p => {
+          // タイトル・説明（こんなことしたい）・本文・カテゴリー・タグをすべて結合して全文検索
+          const searchableText = normalizeText(
+            (p.title || '') + ' ' +
+            (p.target || '') + ' ' +
+            (p.category || '') + ' ' +
+            (p.tags || '') + ' ' +
+            (p.template || '')
+          );
+          return keywords.every(kw => searchableText.includes(kw));
+        });
       }
 
       if (list.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:30px 10px; color:#94a3b8;">該当するプロンプトがありません</div>';
+        container.innerHTML = `
+          <div style="text-align:center; padding:35px 15px; color:#94a3b8;">
+            <i class="fas fa-search" style="font-size:24px; margin-bottom:8px; display:block; opacity:0.6;"></i>
+            「${escapeHtml(rawQuery)}」に一致するプロンプトは見つかりませんでした。<br>
+            <span style="font-size:12px; color:#64748b; margin-top:4px; display:inline-block;">
+              ※「記録」「連絡」「ヒヤリ」「報告」など短い単語でも探せます。
+            </span>
+          </div>`;
         return;
       }
 
@@ -2690,10 +2767,15 @@
       vibrate(10);
       currentOpenedPrompt = prompt;
       document.getElementById('promptDetailTitle').textContent = prompt.title;
-      document.getElementById('promptDetailTarget').textContent = '【やりたいこと】' + prompt.target;
+      document.getElementById('promptDetailTarget').textContent = '【こんなことしたい】' + prompt.target;
       document.getElementById('promptDetailText').value = prompt.template;
-      document.getElementById('btnDeletePrompt').style.display = isAdmin ? 'block' : 'none';
-      document.getElementById('promptDetailModal').classList.add('active');
+      
+      const editBtn = document.getElementById('btnEditPrompt');
+      if (editBtn) editBtn.style.display = isAdmin ? 'block' : 'none';
+      const delBtn = document.getElementById('btnDeletePrompt');
+      if (delBtn) delBtn.style.display = isAdmin ? 'block' : 'none';
+      
+      openModal('promptDetailModal');
     }
 
     function copyPromptText() {
@@ -2715,32 +2797,88 @@
       }, 300);
     }
 
+    // ▼▼ Gems風 1画面プロンプト作成・編集 ▼▼
     function openNewPromptForm() {
       if (!isAdmin) return;
-      const title = prompt('プロンプトのタイトルを入力してください:');
-      if (!title) return;
-      const target = prompt('「こんなことをしたい」内容を入力してください:');
-      if (!target) return;
-      const template = prompt('AIに渡すテンプレート文章を入力してください:');
-      if (!template) return;
-      const category = prompt('カテゴリー（介護記録・申し送り / 安全管理・報告書 / ご家族対応 / レクリエーション / 研修・マニュアル / その他）:', '介護記録・申し送り') || 'その他';
+      vibrate(15);
+      document.getElementById('promptFormEditId').value = '';
+      document.getElementById('promptFormModalTitle').innerHTML = '<i class="fas fa-gem" style="color:#8b5cf6;"></i> AIプロンプトの作成（Gems風）';
+      document.getElementById('promptFormTitle').value = '';
+      document.getElementById('promptFormCategory').value = '介護記録・申し送り';
+      document.getElementById('promptFormTarget').value = '';
+      document.getElementById('promptFormTags').value = '';
+      document.getElementById('promptFormTemplate').value = '';
+      openModal('promptFormModal');
+      setTimeout(() => {
+        document.getElementById('promptFormTitle').focus();
+      }, 150);
+    }
 
-      const newPrompt = {
-        id: 'prompt-' + Date.now(),
-        title: title.trim(),
-        target: target.trim(),
-        template: template.trim(),
-        category: category.trim()
-      };
-      allPrompts.unshift(newPrompt);
+    function editCurrentPrompt() {
+      if (!isAdmin || !currentOpenedPrompt) return;
+      vibrate(15);
+      closeModal('promptDetailModal');
+      document.getElementById('promptFormEditId').value = currentOpenedPrompt.id;
+      document.getElementById('promptFormModalTitle').innerHTML = '<i class="fas fa-pen" style="color:#8b5cf6;"></i> AIプロンプトの編集';
+      document.getElementById('promptFormTitle').value = currentOpenedPrompt.title || '';
+      document.getElementById('promptFormCategory').value = currentOpenedPrompt.category || '介護記録・申し送り';
+      document.getElementById('promptFormTarget').value = currentOpenedPrompt.target || '';
+      document.getElementById('promptFormTags').value = currentOpenedPrompt.tags || '';
+      document.getElementById('promptFormTemplate').value = currentOpenedPrompt.template || '';
+      openModal('promptFormModal');
+    }
+
+    function savePromptForm(event) {
+      event.preventDefault();
+      if (!isAdmin) return;
+      vibrate(20);
+
+      const editId = document.getElementById('promptFormEditId').value;
+      const title = document.getElementById('promptFormTitle').value.trim();
+      const category = document.getElementById('promptFormCategory').value;
+      const target = document.getElementById('promptFormTarget').value.trim();
+      const tags = document.getElementById('promptFormTags').value.trim();
+      const template = document.getElementById('promptFormTemplate').value.trim();
+
+      if (!title || !target || !template) {
+        alert('タイトル・目的（こんなことしたい）・プロンプト本文は必須項目です。');
+        return;
+      }
+
+      if (editId) {
+        // 既存プロンプトの更新
+        const existing = allPrompts.find(p => p.id === editId);
+        if (existing) {
+          existing.title = title;
+          existing.category = category;
+          existing.target = target;
+          existing.tags = tags;
+          existing.template = template;
+        }
+        showToast('💎 プロンプトを更新しました');
+      } else {
+        // 新規プロンプトの追加
+        const newPrompt = {
+          id: 'prompt-' + Date.now(),
+          title,
+          category,
+          target,
+          tags,
+          template
+        };
+        allPrompts.unshift(newPrompt);
+        showToast('💎 新しいプロンプトを作成しました');
+      }
+
       savePromptsData();
+      closeModal('promptFormModal');
       renderPrompts();
-      showToast('新しいプロンプトを追加しました');
     }
 
     function deleteCurrentPrompt() {
       if (!isAdmin || !currentOpenedPrompt) return;
       if (!confirm(`プロンプト「${currentOpenedPrompt.title}」を削除しますか？`)) return;
+      vibrate(20);
       allPrompts = allPrompts.filter(p => p.id !== currentOpenedPrompt.id);
       savePromptsData();
       closeModal('promptDetailModal');
