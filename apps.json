@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "Google ドライブ",
+    "url": "https://drive.google.com/",
+    "imageData": "https://ssl.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png",
+    "dept": "ぐーぐるどらいぶ 書類 保管 クラウド",
+    "type": "app",
+    "parent": "",
+    "category": "アプリ"
+  },
+  {
+    "id": 2,
+    "name": "スプレッドシート",
+    "url": "https://docs.google.com/spreadsheets/",
+    "imageData": "https://ssl.gstatic.com/images/branding/product/2x/sheets_2020q4_48dp.png",
+    "dept": "すぷれっどしーと 表計算 記録",
+    "type": "app",
+    "parent": "",
+    "category": "アプリ"
+  },
+  {
+    "id": 3,
+    "name": "Google Gemini",
+    "url": "https://gemini.google.com/",
+    "imageData": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+    "dept": "じぇみに 人工知能 AI 相談 検索",
+    "type": "app",
+    "parent": "",
+    "category": "AI"
+  },
+  {
+    "id": 4,
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/",
+    "imageData": "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
+    "dept": "ちゃっとじーぴーてぃー AI 人工知能",
+    "type": "app",
+    "parent": "",
+    "category": "AI"
+  },
+  {
+    "id": 5,
+    "name": "業務マニュアル",
+    "url": "https://drive.google.com/",
+    "imageData": "https://cdn-icons-png.flaticon.com/512/2991/2991108.png",
+    "dept": "まにゅある 手順書 規定",
+    "type": "app",
+    "parent": "",
+    "category": "マニュアル"
+  },
+  {
+    "id": 6,
+    "name": "介護手順動画",
+    "url": "https://www.youtube.com/",
+    "imageData": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png",
+    "dept": "どうが ゆーちゅーぶ 研修",
+    "type": "app",
+    "parent": "",
+    "category": "動画マニュアル"
+  },
+  {
+    "id": 7,
+    "name": "清華苑ポータル",
+    "url": "https://rokiwo.github.io/seikaen-home/",
+    "imageData": "https://raw.githubusercontent.com/rokiwo/seikaengazou/main/seikaen.png",
+    "dept": "せいかえん ホーム ぽーたる",
+    "type": "app",
+    "parent": "",
+    "category": "アプリ"
+  }
+]
