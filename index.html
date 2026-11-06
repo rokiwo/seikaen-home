@@ -124,19 +124,19 @@
       transform: translateY(-1px);
     }
 
-    /* 管理メニューグリッド（5項目対応） */
+    /* 管理メニューグリッド（6項目対応：新規登録・一括・プロンプト・利用統計・アナウンス・パスコード） */
     .admin-actions-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 6px;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .admin-actions-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 6px;
       }
     }
-    @media (max-width: 380px) {
+    @media (max-width: 400px) {
       .admin-actions-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 6px;
@@ -761,7 +761,7 @@
       text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
     }
 
-    /* 🆕 新着バッジ（1週間以内） */
+    /* 🆕 新着バッジ（登録から1週間以内） */
     .new-indicator-badge {
       position: absolute;
       top: -5px;
@@ -774,6 +774,24 @@
       border-radius: 8px;
       border: 1.5px solid white;
       box-shadow: 0 2px 6px rgba(236, 72, 153, 0.6);
+      z-index: 12;
+      pointer-events: none;
+      letter-spacing: 0.5px;
+      animation: pulseNew 2s infinite ease-in-out;
+    }
+    /* 🔄 更新バッジ（修正から1週間以内） */
+    .update-indicator-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: white;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 2px 5px;
+      border-radius: 8px;
+      border: 1.5px solid white;
+      box-shadow: 0 2px 6px rgba(14, 165, 233, 0.6);
       z-index: 12;
       pointer-events: none;
       letter-spacing: 0.5px;
@@ -1239,6 +1257,10 @@
           <i class="fas fa-chart-bar" style="color:#38bdf8;"></i>
           <span>どれだけ使われたか<br>（利用統計）</span>
         </button>
+        <button class="admin-action-btn btn-announce" style="background: linear-gradient(135deg, #ec4899, #f43f5e); border-color: #fb7185;" onclick="openAnnounceManageModal()">
+          <i class="fas fa-bullhorn" style="color:white;"></i>
+          <span>お知らせ<br>アナウンス</span>
+        </button>
         <button class="admin-action-btn" onclick="openChangePassModal()">
           <i class="fas fa-key"></i>
           <span>パスコード<br>変更</span>
@@ -1337,6 +1359,20 @@
             <img id="imagePreview" style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:1px solid #ccc;">
             <span style="font-size:12px; color:#64748b;">選択中プレビュー</span>
           </div>
+        </div>
+
+        <!-- 📢 新機能・更新アナウンス設定（空欄なら自動生成・手間ゼロ） -->
+        <div class="form-group" style="background: rgba(236, 72, 153, 0.08); border: 1.5px dashed rgba(236, 72, 153, 0.4); border-radius: 14px; padding: 12px; margin-top: 10px; margin-bottom: 16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom:0; color:#db2777; font-weight:700; font-size:13px;">
+              <i class="fas fa-bullhorn"></i> 新機能・更新アナウンス（1週間トップに掲載）
+            </label>
+            <span style="font-size:10.5px; background:linear-gradient(135deg, #ec4899, #f43f5e); color:white; padding:2px 7px; border-radius:10px; font-weight:800;">自動設定</span>
+          </div>
+          <input type="text" id="formAppNotice" class="form-input" placeholder="空欄のままでOK（自動でお知らせ文が作られます）" style="font-size:13px; background:white;">
+          <span style="font-size:11px; color:#64748b; margin-top:5px; display:block; line-height:1.4;">
+            💡 <strong>面倒な入力は一切不要！</strong> 空欄で保存しても「新機能/更新」として自動で1週間トップの新機能バーにアナウンスされます。
+          </span>
         </div>
 
         <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> 保存する</button>
@@ -1625,13 +1661,59 @@
   <div id="newAppsModal" class="modal-overlay" onclick="handleOverlayClick(event, 'newAppsModal')">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title"><i class="fas fa-bullhorn" style="color: #ec4899;"></i> 新機能・新着アプリのお知らせ</h3>
+        <h3 class="modal-title"><i class="fas fa-bullhorn" style="color: #ec4899;"></i> 新機能・更新アプリのお知らせ</h3>
         <button class="modal-close-icon" onclick="closeModal('newAppsModal')"><i class="fas fa-times"></i></button>
       </div>
       <div id="newAppsModalList" style="padding: 12px 0; display:flex; flex-direction:column; gap:12px; max-height: 60vh; overflow-y: auto;">
-        <!-- 新着アプリ一覧がここに動的生成される -->
+        <!-- 新着・更新アプリ一覧がここに動的生成される -->
       </div>
       <button type="button" class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('newAppsModal')">閉じる</button>
+    </div>
+  </div>
+
+  <!-- 管理者用お知らせ・アナウンス管理モーダル -->
+  <div id="announceManageModal" class="modal-overlay" onclick="handleOverlayClick(event, 'announceManageModal')">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-bullhorn" style="color: #ec4899;"></i> お知らせ・アナウンス管理（管理者）</h3>
+        <button class="modal-close-icon" onclick="closeModal('announceManageModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="padding: 10px 0;">
+        <p style="font-size: 13px; color: #475569; margin-bottom: 14px; line-height: 1.5;">
+          アプリを<strong>「登録」または「修正」すると、自動的に1週間（7日間）トップバーと新機能お知らせに掲載</strong>されます。<br>
+          管理者が手作業で告知文を書かなくても、システムが自動でアナウンスを発信します！
+        </p>
+
+        <!-- 現在アナウンス掲載中のアプリ一覧 -->
+        <div style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 8px; display:flex; align-items:center; justify-content:space-between;">
+          <span><i class="fas fa-clock text-pink-500"></i> 現在掲載中のアプリ（登録・修正から1週間以内）</span>
+          <span id="announceActiveCount" style="font-size:12px; background:#f43f5e; color:white; padding:2px 8px; border-radius:12px;">0 件</span>
+        </div>
+        <div id="announceActiveList" style="max-height: 28vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; padding-right: 4px;">
+          <!-- 掲載中リストが動的生成される -->
+        </div>
+
+        <!-- 任意で追加できる全体アナウンス（ひとこと連絡） -->
+        <div style="background: rgba(244, 63, 94, 0.05); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 14px; padding: 12px;">
+          <div style="font-weight: 700; font-size: 13px; color: #be123c; margin-bottom: 6px;">
+            <i class="fas fa-bullhorn"></i> 全体への緊急・ひとことアナウンス（任意）
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="manualNoticeInput" class="form-input" placeholder="例：来週月曜日は定期メンテナンスです" style="font-size:13px; background:white;">
+            <button type="button" class="btn btn-primary" style="width:auto; white-space:nowrap; padding:0 14px; background:linear-gradient(135deg, #ec4899, #f43f5e); font-size:12.5px;" onclick="publishManualNotice()">
+              <i class="fas fa-paper-plane"></i> 1週間掲載
+            </button>
+          </div>
+          <div id="currentManualNoticeArea" style="margin-top:8px; display:none; align-items:center; justify-content:space-between; background:white; padding:6px 12px; border-radius:8px; border:1px solid #fda4af;">
+            <span style="font-size:12px; color:#9f1239; font-weight:600;" id="currentManualNoticeText"></span>
+            <button type="button" style="background:none; border:none; color:#e11d48; cursor:pointer; font-size:13px; font-weight:bold;" onclick="clearManualNotice()" title="アナウンスを削除">
+              <i class="fas fa-times-circle"></i> 取消
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" style="margin-top: 16px;" onclick="closeModal('announceManageModal')">閉じる</button>
+      </div>
     </div>
   </div>
 
@@ -1751,7 +1833,7 @@
       }
     }
 
-    // ▼▼ データロード（apps.json） ▼▼
+    // ▼▼ データロード（apps.json：キャッシュ保護＆スマートマージ） ▼▼
     async function loadAppsData() {
       const cached = localStorage.getItem('seikaen_apps_data');
       if (cached) {
@@ -1759,22 +1841,38 @@
           allApps = JSON.parse(cached);
           renderApps();
           checkNewAppsBanner();
-          return;
         } catch {}
       }
 
       try {
         const res = await fetch('./apps.json?v=' + Date.now());
         if (res.ok) {
-          allApps = await res.json();
-          saveAppsData();
+          const serverApps = await res.json();
+          if (!allApps || allApps.length === 0) {
+            allApps = serverApps;
+            saveAppsData();
+            renderApps();
+            checkNewAppsBanner();
+          } else {
+            // サーバー側で新たに追加された公式アプリがあればマージ（ローカルの変更は優先保護）
+            let merged = false;
+            serverApps.forEach(sApp => {
+              const exists = allApps.some(a => Number(a.id) === Number(sApp.id));
+              if (!exists) {
+                allApps.push(sApp);
+                merged = true;
+              }
+            });
+            if (merged) {
+              saveAppsData();
+              renderApps();
+              checkNewAppsBanner();
+            }
+          }
         }
       } catch (err) {
         console.warn('apps.json 読み込み失敗:', err);
-        allApps = [];
       }
-      renderApps();
-      checkNewAppsBanner();
     }
 
     function saveAppsData() {
@@ -1807,26 +1905,129 @@
       localStorage.setItem('seikaen_prompts_data', JSON.stringify(allPrompts));
     }
 
-    // ▼▼ 新着アプリお知らせ判定（過去7日間以内） ▼▼
-    function isAppNew(createdAt) {
-      if (!createdAt) return false;
-      const createdTime = new Date(createdAt).getTime();
+    // ▼▼ 新着・更新判定（登録・修正から7日間きっちり残る） ▼▼
+    function isAppNew(appOrDate) {
+      if (!appOrDate) return false;
+      let targetTime = null;
+      if (typeof appOrDate === 'string' || typeof appOrDate === 'number') {
+        targetTime = new Date(appOrDate).getTime();
+      } else if (typeof appOrDate === 'object') {
+        // 管理者によって非表示設定された場合は除外
+        if (appOrDate.dismissedAnnouncement) return false;
+        // 修正日時（updatedAt）を優先、なければ登録日時（createdAt）
+        const dateStr = appOrDate.updatedAt || appOrDate.createdAt;
+        if (!dateStr) return false;
+        targetTime = new Date(dateStr).getTime();
+      }
+      if (!targetTime || isNaN(targetTime)) return false;
       const now = Date.now();
-      const diffMs = now - createdTime;
+      const diffMs = now - targetTime;
       const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
       return diffMs >= 0 && diffMs <= sevenDaysMs;
     }
 
-    // ▼▼ 新機能・新着アプリ制御（2段目で間延びゼロ） ▼▼
+    function getAppNewType(app) {
+      if (!app) return 'new';
+      if (app.updatedAt && isAppNew(app.updatedAt)) {
+        return 'updated';
+      }
+      return 'new';
+    }
+
+    function formatDateJapanese(dateStrOrTs) {
+      if (!dateStrOrTs) return '';
+      const d = new Date(dateStrOrTs);
+      const m = d.getMonth() + 1;
+      const date = d.getDate();
+      return `${m}月${date}日`;
+    }
+
+    // 直近1週間（7日間）以内の登録・修正アナウンス一覧を取得
+    function getActiveAnnouncements() {
+      const items = [];
+      const now = Date.now();
+      const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
+      // 手動全体アナウンスがあれば先頭に追加
+      const manualNotice = localStorage.getItem('seikaen_manual_notice');
+      const manualNoticeTime = Number(localStorage.getItem('seikaen_manual_notice_time') || 0);
+      if (manualNotice && manualNoticeTime && (now - manualNoticeTime) <= sevenDaysMs) {
+        items.push({
+          id: 'manual',
+          name: '全館お知らせ',
+          type: 'manual',
+          timestamp: manualNoticeTime,
+          dateStr: formatDateJapanese(manualNoticeTime),
+          note: manualNotice,
+          daysLeft: Math.max(1, Math.ceil((sevenDaysMs - (now - manualNoticeTime)) / (24 * 60 * 60 * 1000)))
+        });
+      }
+
+      allApps.forEach(app => {
+        if (app.type === 'folder' || app.dismissedAnnouncement) return;
+        
+        let isUpdated = false;
+        let eventTime = null;
+
+        // 修正日時チェック
+        if (app.updatedAt) {
+          const t = new Date(app.updatedAt).getTime();
+          if (!isNaN(t) && (now - t) >= 0 && (now - t) <= sevenDaysMs) {
+            isUpdated = true;
+            eventTime = t;
+          }
+        }
+        // 登録日時チェック（修正から1週間がなければ登録日時）
+        if (!eventTime && app.createdAt) {
+          const t = new Date(app.createdAt).getTime();
+          if (!isNaN(t) && (now - t) >= 0 && (now - t) <= sevenDaysMs) {
+            eventTime = t;
+          }
+        }
+
+        if (eventTime) {
+          const remainingMs = sevenDaysMs - (now - eventTime);
+          const daysLeft = Math.max(1, Math.ceil(remainingMs / (24 * 60 * 60 * 1000)));
+          items.push({
+            id: app.id,
+            name: app.name,
+            url: app.url,
+            category: app.category,
+            imageData: app.imageData,
+            type: isUpdated ? 'updated' : 'new',
+            timestamp: eventTime,
+            dateStr: formatDateJapanese(eventTime),
+            daysLeft,
+            note: app.announcementNote || (isUpdated ? '機能・設定をアップデートしました！' : '新しいアプリが追加されました！')
+          });
+        }
+      });
+
+      // 最新順にソート（手動アナウンスは最優先）
+      items.sort((a, b) => {
+        if (a.type === 'manual') return -1;
+        if (b.type === 'manual') return 1;
+        return b.timestamp - a.timestamp;
+      });
+
+      return items;
+    }
+
+    // ▼▼ 新機能・新着アプリ制御（2段目で間延びゼロ・登録＆修正から1週間残る） ▼▼
     function checkNewAppsBanner() {
-      const newApps = allApps.filter(a => isAppNew(a.createdAt));
+      const announces = getActiveAnnouncements();
       const subNewsBar = document.getElementById('subNewsBar');
       const subNewsText = document.getElementById('subNewsText');
       if (subNewsBar) {
-        if (newApps.length > 0) {
+        if (announces.length > 0) {
           subNewsBar.style.display = 'block';
           if (subNewsText) {
-            subNewsText.textContent = `新機能アプリ: 「${escapeHtml(newApps[0].name)}」が利用可能です（計 ${newApps.length} 件）`;
+            const latest = announces[0];
+            let prefix = '✨ 新機能';
+            if (latest.type === 'updated') prefix = '🔄 更新';
+            if (latest.type === 'manual') prefix = '📢 お知らせ';
+            
+            subNewsText.textContent = `${prefix}: 「${escapeHtml(latest.name)}」${latest.note ? ' - ' + escapeHtml(latest.note) : ''}（計 ${announces.length} 件）`;
           }
         } else {
           subNewsBar.style.display = 'none';
@@ -1834,58 +2035,232 @@
       }
     }
 
+    // 新機能・更新アプリ一覧モーダル（一般ユーザー向け）
     function openNewAppsModal() {
       vibrate(15);
-      const newApps = allApps.filter(a => isAppNew(a.createdAt));
+      const announces = getActiveAnnouncements();
       const listEl = document.getElementById('newAppsModalList');
       if (!listEl) return;
       listEl.innerHTML = '';
 
-      if (newApps.length === 0) {
-        listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px 0;">現在、直近1週間の新着アプリはありません。</div>';
+      if (announces.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:24px 0;">現在、直近1週間の新機能・更新アプリはありません。</div>';
       } else {
-        newApps.forEach(app => {
-          const item = document.createElement('div');
-          item.style.cssText = 'background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px;';
+        announces.forEach(item => {
+          const card = document.createElement('div');
+          card.style.cssText = 'background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px;';
           
+          const isUp = item.type === 'updated';
+          const isManual = item.type === 'manual';
+          let badgeBg = 'linear-gradient(135deg, #ec4899, #f43f5e)';
+          let badgeText = '✨ 新機能';
+          if (isUp) {
+            badgeBg = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
+            badgeText = '🔄 更新';
+          } else if (isManual) {
+            badgeBg = 'linear-gradient(135deg, #f59e0b, #d97706)';
+            badgeText = '📢 全体連絡';
+          }
+
           const left = document.createElement('div');
           left.style.cssText = 'display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;';
-          
-          const img = document.createElement('img');
-          img.style.cssText = 'width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: white; padding: 4px; flex-shrink: 0;';
-          img.src = app.imageData || `https://www.google.com/s2/favicons?domain=${extractDomain(app.url)}&sz=128`;
-          img.onerror = () => { img.src = 'https://raw.githubusercontent.com/rokiwo/seikaengazou/main/seikaen.png'; };
-          
-          const textDiv = document.createElement('div');
-          textDiv.style.cssText = 'overflow: hidden;';
-          const nameDiv = document.createElement('div');
-          nameDiv.style.cssText = 'font-weight: 700; font-size: 14px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
-          nameDiv.textContent = app.name;
-          const catDiv = document.createElement('div');
-          catDiv.style.cssText = 'font-size: 11px; color: #fb7185; margin-top: 2px;';
-          catDiv.textContent = `カテゴリー: ${app.category || 'アプリ'} (NEW)`;
-          textDiv.appendChild(nameDiv);
-          textDiv.appendChild(catDiv);
 
-          left.appendChild(img);
+          if (!isManual) {
+            const img = document.createElement('img');
+            img.style.cssText = 'width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: white; padding: 4px; flex-shrink: 0;';
+            img.src = item.imageData || `https://www.google.com/s2/favicons?domain=${extractDomain(item.url)}&sz=128`;
+            img.onerror = () => { img.src = 'https://raw.githubusercontent.com/rokiwo/seikaengazou/main/seikaen.png'; };
+            left.appendChild(img);
+          } else {
+            const iconBox = document.createElement('div');
+            iconBox.style.cssText = 'width: 44px; height: 44px; border-radius: 10px; background: rgba(245,158,11,0.2); border: 1px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #f59e0b; flex-shrink: 0;';
+            iconBox.innerHTML = '<i class="fas fa-bullhorn"></i>';
+            left.appendChild(iconBox);
+          }
+
+          const textDiv = document.createElement('div');
+          textDiv.style.cssText = 'overflow: hidden; flex: 1;';
+
+          const titleRow = document.createElement('div');
+          titleRow.style.cssText = 'display:flex; align-items:center; gap:6px; flex-wrap:wrap;';
+
+          const badgeSpan = document.createElement('span');
+          badgeSpan.style.cssText = `background: ${badgeBg}; color: white; font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 6px;`;
+          badgeSpan.textContent = badgeText;
+
+          const nameSpan = document.createElement('span');
+          nameSpan.style.cssText = 'font-weight: 700; font-size: 14px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;';
+          nameSpan.textContent = item.name;
+
+          titleRow.appendChild(badgeSpan);
+          titleRow.appendChild(nameSpan);
+
+          const descDiv = document.createElement('div');
+          descDiv.style.cssText = 'font-size: 12px; color: #cbd5e1; margin-top: 3px; font-weight: 500;';
+          descDiv.textContent = item.note;
+
+          const metaDiv = document.createElement('div');
+          metaDiv.style.cssText = 'font-size: 10.5px; color: #94a3b8; margin-top: 3px; display:flex; gap:10px;';
+          metaDiv.innerHTML = `<span><i class="far fa-calendar-alt"></i> ${item.dateStr}</span> <span><i class="far fa-clock"></i> 残り ${item.daysLeft} 日</span>`;
+
+          textDiv.appendChild(titleRow);
+          textDiv.appendChild(descDiv);
+          textDiv.appendChild(metaDiv);
           left.appendChild(textDiv);
 
-          const openBtn = document.createElement('button');
-          openBtn.className = 'btn btn-primary';
-          openBtn.style.cssText = 'padding: 6px 14px; font-size: 12px; width: auto; white-space: nowrap; flex-shrink: 0;';
-          openBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> 開く';
-          openBtn.onclick = () => {
-            trackAppUsage(app.id);
-            window.open(app.url, '_blank', 'noopener,noreferrer');
-          };
+          card.appendChild(left);
 
-          item.appendChild(left);
-          item.appendChild(openBtn);
-          listEl.appendChild(item);
+          if (!isManual && item.url) {
+            const openBtn = document.createElement('button');
+            openBtn.className = 'btn btn-primary';
+            openBtn.style.cssText = 'padding: 7px 14px; font-size: 12px; width: auto; white-space: nowrap; flex-shrink: 0;';
+            openBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> 開く';
+            openBtn.onclick = () => {
+              trackAppUsage(item.id);
+              window.open(item.url, '_blank', 'noopener,noreferrer');
+            };
+            card.appendChild(openBtn);
+          }
+
+          listEl.appendChild(card);
         });
       }
 
       openModal('newAppsModal');
+    }
+
+    // ▼▼ 管理者用お知らせ・アナウンス管理モーダル制御 ▼▼
+    function openAnnounceManageModal() {
+      if (!isAdmin) return;
+      vibrate(15);
+      renderAnnounceManageList();
+      openModal('announceManageModal');
+    }
+
+    function renderAnnounceManageList() {
+      const listEl = document.getElementById('announceActiveList');
+      const countEl = document.getElementById('announceActiveCount');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      const announces = getActiveAnnouncements();
+      if (countEl) countEl.textContent = `${announces.length} 件`;
+
+      // 全体アナウンス状態表示
+      const manualNotice = localStorage.getItem('seikaen_manual_notice');
+      const manualArea = document.getElementById('currentManualNoticeArea');
+      const manualText = document.getElementById('currentManualNoticeText');
+      if (manualNotice && manualArea && manualText) {
+        manualArea.style.display = 'flex';
+        manualText.textContent = manualNotice;
+      } else if (manualArea) {
+        manualArea.style.display = 'none';
+      }
+
+      if (announces.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:16px 0; font-size:13px;">現在1週間アナウンス掲載中のアプリはありません。</div>';
+        return;
+      }
+
+      announces.forEach(item => {
+        const row = document.createElement('div');
+        row.style.cssText = 'background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;';
+
+        const left = document.createElement('div');
+        left.style.cssText = 'overflow: hidden; flex: 1;';
+
+        const isUp = item.type === 'updated';
+        const isManual = item.type === 'manual';
+        const badgeColor = isUp ? '#0284c7' : (isManual ? '#d97706' : '#ec4899');
+        const badgeText = isUp ? '更新' : (isManual ? '全体連絡' : '新規');
+
+        left.innerHTML = `
+          <div style="font-size:13px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:6px;">
+            <span style="font-size:10px; background:${badgeColor}; color:white; padding:1px 6px; border-radius:4px;">${badgeText}</span>
+            <span>${escapeHtml(item.name)}</span>
+            <span style="font-size:11px; color:#64748b; font-weight:normal;">(${item.dateStr} / 残り${item.daysLeft}日)</span>
+          </div>
+          <div style="font-size:12px; color:#475569; margin-top:2px;">${escapeHtml(item.note)}</div>
+        `;
+
+        const btnArea = document.createElement('div');
+        btnArea.style.cssText = 'display:flex; gap:6px; flex-shrink:0;';
+
+        if (!isManual) {
+          // 延長ボタン
+          const extBtn = document.createElement('button');
+          extBtn.className = 'btn btn-secondary';
+          extBtn.style.cssText = 'padding: 4px 8px; font-size: 11px; width:auto; border-color:#93c5fd; color:#1d4ed8;';
+          extBtn.innerHTML = '<i class="fas fa-history"></i> +1週間延長';
+          extBtn.title = 'アナウンス掲載期間を今日から1週間に再延長します';
+          extBtn.onclick = () => extendAppAnnouncement(item.id);
+
+          // 終了ボタン
+          const disBtn = document.createElement('button');
+          disBtn.className = 'btn btn-secondary';
+          disBtn.style.cssText = 'padding: 4px 8px; font-size: 11px; width:auto; border-color:#fca5a5; color:#b91c1c;';
+          disBtn.innerHTML = '<i class="fas fa-eye-slash"></i> 終了';
+          disBtn.title = 'このアプリのアナウンス掲載を終了します';
+          disBtn.onclick = () => dismissAppAnnouncement(item.id);
+
+          btnArea.appendChild(extBtn);
+          btnArea.appendChild(disBtn);
+        }
+
+        row.appendChild(left);
+        row.appendChild(btnArea);
+        listEl.appendChild(row);
+      });
+    }
+
+    // アナウンス掲載を今日から1週間延長
+    function extendAppAnnouncement(appId) {
+      const app = allApps.find(a => Number(a.id) === Number(appId));
+      if (!app) return;
+      app.updatedAt = new Date().toISOString();
+      delete app.dismissedAnnouncement;
+      saveAppsData();
+      renderAnnounceManageList();
+      checkNewAppsBanner();
+      renderApps();
+      showToast(`「${app.name}」のアナウンス期間を1週間延長しました！`);
+    }
+
+    // アナウンス掲載を即時終了
+    function dismissAppAnnouncement(appId) {
+      const app = allApps.find(a => Number(a.id) === Number(appId));
+      if (!app) return;
+      app.dismissedAnnouncement = true;
+      saveAppsData();
+      renderAnnounceManageList();
+      checkNewAppsBanner();
+      renderApps();
+      showToast(`「${app.name}」のアナウンスを終了しました`);
+    }
+
+    // 全体アナウンス（自由ひとこと連絡）を発信
+    function publishManualNotice() {
+      const input = document.getElementById('manualNoticeInput');
+      const text = input ? input.value.trim() : '';
+      if (!text) {
+        alert('アナウンス内容を入力してください');
+        return;
+      }
+      localStorage.setItem('seikaen_manual_notice', text);
+      localStorage.setItem('seikaen_manual_notice_time', String(Date.now()));
+      if (input) input.value = '';
+      renderAnnounceManageList();
+      checkNewAppsBanner();
+      showToast('📢 全体アナウンスを1週間掲載しました！');
+    }
+
+    // 全体アナウンスを削除
+    function clearManualNotice() {
+      localStorage.removeItem('seikaen_manual_notice');
+      localStorage.removeItem('seikaen_manual_notice_time');
+      renderAnnounceManageList();
+      checkNewAppsBanner();
+      showToast('全体アナウンスを取り消しました');
     }
 
     // ▼▼ どれだけ使われたか（利用統計）制御 ▼▼
@@ -2093,10 +2468,11 @@
       showToast('一般画面に戻りました');
     }
 
-    // 強制最新状態更新（Service Worker＆キャッシュ完全クリア）
+    // 強制最新状態更新（Service Worker＆ブラウザキャッシュのクリア）
+    // ★ユーザーが登録・修正したアプリデータや新着お知らせは安全に保護されます！
     async function forceAppRefresh() {
       vibrate(20);
-      showToast('🔄 キャッシュをクリアして最新版を取得中...');
+      showToast('🔄 キャッシュを更新して最新版を取得中...');
       try {
         if ('serviceWorker' in navigator) {
           const registrations = await navigator.serviceWorker.getRegistrations();
@@ -2113,8 +2489,6 @@
       } catch (e) {
         console.warn('キャッシュクリアエラー:', e);
       }
-      localStorage.removeItem('seikaen_apps_data');
-      localStorage.removeItem('seikaen_prompts_data');
       setTimeout(() => {
         window.location.reload(true);
       }, 400);
@@ -2361,11 +2735,13 @@
         iconWrapper.appendChild(star);
       }
 
-      // 🆕 新着バッジ（1週間以内）
-      if (item.type !== 'folder' && isAppNew(item.createdAt)) {
+      // 🆕 新着・更新バッジ（登録・修正から1週間以内）
+      if (item.type !== 'folder' && isAppNew(item)) {
+        const isUp = getAppNewType(item) === 'updated';
         const newBadge = document.createElement('span');
-        newBadge.className = 'new-indicator-badge';
-        newBadge.textContent = 'NEW';
+        newBadge.className = isUp ? 'update-indicator-badge' : 'new-indicator-badge';
+        newBadge.textContent = isUp ? 'UP' : 'NEW';
+        newBadge.title = isUp ? '最近更新されたアプリ（1週間表示）' : '新しく追加されたアプリ（1週間表示）';
         iconWrapper.appendChild(newBadge);
       }
 
@@ -2690,6 +3066,11 @@
       document.getElementById('formAppDept').value = app.dept || '';
       document.getElementById('formAppImage').value = app.imageData || '';
 
+      const noticeInput = document.getElementById('formAppNotice');
+      if (noticeInput) {
+        noticeInput.value = app.announcementNote || '';
+      }
+
       if (app.imageData) {
         const preview = document.getElementById('imagePreview');
         preview.src = app.imageData;
@@ -2705,6 +3086,8 @@
       document.getElementById('appForm').reset();
       document.getElementById('editAppId').value = '';
       document.getElementById('editParentFolder').value = '';
+      const noticeInput = document.getElementById('formAppNotice');
+      if (noticeInput) noticeInput.value = '';
       document.getElementById('imagePreviewContainer').style.display = 'none';
       document.getElementById('iconCandidatesArea').style.display = 'none';
       document.getElementById('iconCandidatesList').innerHTML = '';
@@ -2791,6 +3174,8 @@
       const dept = document.getElementById('formAppDept').value.trim();
       const imageData = document.getElementById('formAppImage').value.trim();
       const parent = document.getElementById('editParentFolder').value;
+      const noticeInput = document.getElementById('formAppNotice');
+      const notice = noticeInput ? noticeInput.value.trim() : '';
 
       if (!name || !url) {
         alert('アプリ名とURLは必須です');
@@ -2805,8 +3190,11 @@
           target.category = category;
           target.dept = dept;
           target.imageData = imageData;
+          target.updatedAt = new Date().toISOString(); // ★修正日時を更新（今日から1週間残る！）
+          delete target.dismissedAnnouncement;
+          target.announcementNote = notice || '機能や設定をアップデートしました！';
         }
-        showToast('アプリ情報を更新しました');
+        showToast(`「${name}」を更新しました（1週間UPアナウンス掲載）`);
       } else {
         const newApp = {
           id: Date.now(),
@@ -2817,10 +3205,11 @@
           type: 'app',
           parent: '',
           category,
-          createdAt: new Date().toISOString() // 新着1週間判定用
+          createdAt: new Date().toISOString(), // ★登録日時（今日から1週間残る！）
+          announcementNote: notice || '新しいアプリが追加されました！'
         };
         allApps.unshift(newApp);
-        showToast('新しいアプリを登録しました（1週間NEW表示）');
+        showToast(`「${name}」を登録しました（1週間NEWアナウンス掲載）`);
       }
 
       saveAppsData();
