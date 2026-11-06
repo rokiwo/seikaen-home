@@ -1,4 +1,4 @@
-const CACHE_NAME = 'seikaen-home-v5';
+const CACHE_NAME = 'seikaen-home-v7';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
