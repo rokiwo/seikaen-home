@@ -71,35 +71,109 @@
       z-index: 0;
     }
 
-    /* 管理者モードインジケーター */
-    .admin-indicator {
+    /* 管理者コントロールパネル（管理画面モード時のみ出現） */
+    .admin-dashboard-panel {
       display: none;
-      background: linear-gradient(90deg, #f59e0b, #d97706);
-      color: #ffffff;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 700;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-      position: relative;
-      z-index: 10;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.96));
+      border: 1.5px solid #f59e0b;
+      border-radius: 20px;
+      padding: 16px 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      animation: fadeIn 0.25s ease;
       width: 100%;
       box-sizing: border-box;
     }
-    .admin-indicator.active {
-      display: flex;
+    body.is-admin .admin-dashboard-panel {
+      display: block;
     }
-    .admin-indicator-btn {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+
+    .admin-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .admin-panel-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-exit-admin {
+      background: #ef4444;
       color: white;
-      padding: 4px 10px;
+      border: none;
+      padding: 7px 16px;
       border-radius: 12px;
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
-      font-weight: 600;
-      margin-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+      transition: all 0.2s;
+    }
+    .btn-exit-admin:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
+    /* インサートボタングリッド */
+    .admin-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .admin-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+    }
+    .admin-action-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 12px 6px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .admin-action-btn:active {
+      transform: scale(0.95);
+    }
+    .admin-action-btn i {
+      font-size: 20px;
+    }
+    .admin-action-btn.btn-insert-app {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border-color: #60a5fa;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    }
+    .admin-action-btn.btn-bulk-import {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #34d399;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .admin-action-btn.btn-insert-prompt {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      border-color: #a78bfa;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
     }
 
     .main-wrapper {
@@ -864,16 +938,38 @@
 
   <div class="bg-overlay"></div>
 
-  <!-- 管理者モード時のバー -->
-  <div id="adminBar" class="admin-indicator">
-    <span><i class="fas fa-user-shield"></i> 管理者モードで操作中</span>
-    <div>
-      <button class="admin-indicator-btn" onclick="openChangePassModal()"><i class="fas fa-key"></i> パスコード変更</button>
-      <button class="admin-indicator-btn" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> 終了</button>
-    </div>
-  </div>
-
   <div class="main-wrapper">
+    <!-- 管理者ダッシュボード（管理画面モード時のみ出現） -->
+    <div id="adminDashboardPanel" class="admin-dashboard-panel">
+      <div class="admin-panel-header">
+        <div class="admin-panel-title">
+          <i class="fas fa-tools"></i> 管理者画面（インサート・管理操作中）
+        </div>
+        <button class="btn-exit-admin" onclick="logoutAdmin()">
+          <i class="fas fa-arrow-left"></i> 一般画面に戻る
+        </button>
+      </div>
+
+      <div class="admin-actions-grid">
+        <button class="admin-action-btn btn-insert-app" onclick="openAddModal()">
+          <i class="fas fa-plus-circle"></i>
+          <span>アプリをインサート<br>（新規登録）</span>
+        </button>
+        <button class="admin-action-btn btn-bulk-import" onclick="openBulkImportModal()">
+          <i class="fas fa-file-import"></i>
+          <span>JSONを一括<br>インサート</span>
+        </button>
+        <button class="admin-action-btn btn-insert-prompt" onclick="openNewPromptForm()">
+          <i class="fas fa-wand-magic-sparkles"></i>
+          <span>プロンプトを<br>インサート</span>
+        </button>
+        <button class="admin-action-btn" onclick="openChangePassModal()">
+          <i class="fas fa-key"></i>
+          <span>パスコード<br>変更</span>
+        </button>
+      </div>
+    </div>
+
     <!-- 新着アプリお知らせバナー（1週間以内） -->
     <div id="newsBanner" class="news-banner">
       <span class="news-badge-pill">NEW</span>
@@ -1118,6 +1214,27 @@
     </div>
   </div>
 
+  <!-- JSON一括インサートモーダル -->
+  <div id="bulkImportModal" class="modal-overlay" onclick="handleOverlayClick(event, 'bulkImportModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-file-import text-green-600"></i> JSON一括インサート</h3>
+        <button class="modal-close-icon" onclick="closeModal('bulkImportModal')"><i class="fas fa-times"></i></button>
+      </div>
+      <p style="font-size:12px; color:#64748b; margin-bottom:12px; line-height:1.5;">
+        アプリ一覧のJSON配列を貼り付けると、一括でインサート（登録）できます。
+      </p>
+      <div class="form-group">
+        <label class="form-label">インサート用JSONデータ</label>
+        <textarea id="bulkImportJsonText" class="form-textarea" style="height:150px; font-family:monospace; font-size:12px;" placeholder='[&#10;  {&#10;    "name": "アプリ名",&#10;    "url": "https://...",&#10;    "category": "アプリ"&#10;  }&#10;]'></textarea>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeModal('bulkImportModal')">キャンセル</button>
+        <button class="btn btn-primary" style="flex:1; background:#10b981;" onclick="executeBulkImport()"><i class="fas fa-upload"></i> インサート実行</button>
+      </div>
+    </div>
+  </div>
+
   <!-- パスコード変更モーダル -->
   <div id="changePassModal" class="modal-overlay" onclick="handleOverlayClick(event, 'changePassModal')">
     <div class="modal-card" style="max-width:380px;">
@@ -1198,7 +1315,7 @@
     window.addEventListener('DOMContentLoaded', async () => {
       loadWallpaper();
       loadFavorites();
-      checkSavedAdminStatus();
+      setAdminMode(false); // ★開いたときは常に一般画面からスタート！
       await Promise.all([loadAppsData(), loadPromptsData()]);
       initServiceWorker();
 
@@ -1314,26 +1431,21 @@
       return localStorage.getItem('seikaen_admin_pass') || '0800';
     }
 
-    function checkSavedAdminStatus() {
-      const saved = sessionStorage.getItem('seikaen_is_admin');
-      if (saved === 'true') {
-        setAdminMode(true);
-      }
-    }
-
     function setAdminMode(active) {
       isAdmin = active;
       document.body.classList.toggle('is-admin', active);
-      document.getElementById('adminBar').classList.toggle('active', active);
-      document.getElementById('adminLoginSection').style.display = active ? 'none' : 'block';
-      document.getElementById('adminLoggedInSection').style.display = active ? 'block' : 'none';
-      document.getElementById('adminPromptAddBtnArea').style.display = active ? 'block' : 'none';
+      
+      const loginSec = document.getElementById('adminLoginSection');
+      if (loginSec) loginSec.style.display = active ? 'none' : 'block';
+      const loggedSec = document.getElementById('adminLoggedInSection');
+      if (loggedSec) loggedSec.style.display = active ? 'block' : 'none';
+      const promptAdd = document.getElementById('adminPromptAddBtnArea');
+      if (promptAdd) promptAdd.style.display = active ? 'block' : 'none';
       const delFolderBtn = document.getElementById('btnDeleteFolder');
       if (delFolderBtn) delFolderBtn.style.display = active ? 'block' : 'none';
+
       if (active) {
-        sessionStorage.setItem('seikaen_is_admin', 'true');
-      } else {
-        sessionStorage.removeItem('seikaen_is_admin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       renderApps();
     }
@@ -1346,16 +1458,67 @@
         setAdminMode(true);
         document.getElementById('adminPassInput').value = '';
         closeModal('settingsModal');
-        showToast('🔑 管理者モードにログインしました');
+        showToast('🛠️ 管理者画面に切り替えました');
       } else {
         vibrate(50);
-        alert('パスコードが正しくありません');
+        alert('パスコードが正しくありません（初期設定: 0800）');
       }
     }
 
     function logoutAdmin() {
+      vibrate(15);
       setAdminMode(false);
-      showToast('管理者モードを終了しました');
+      showToast('一般画面に戻りました');
+    }
+
+    // ▼▼ JSON一括インサート機能 ▼▼
+    function openBulkImportModal() {
+      if (!isAdmin) return;
+      vibrate(15);
+      document.getElementById('bulkImportJsonText').value = '';
+      document.getElementById('bulkImportModal').classList.add('active');
+    }
+
+    function executeBulkImport() {
+      if (!isAdmin) return;
+      const text = document.getElementById('bulkImportJsonText').value.trim();
+      if (!text) {
+        alert('インサートするJSONデータを入力してください');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(text);
+        if (!Array.isArray(parsed)) {
+          alert('JSONは配列形式（[...]）である必要があります');
+          return;
+        }
+
+        let insertedCount = 0;
+        parsed.reverse().forEach((item) => {
+          if (item && item.name) {
+            allApps.unshift({
+              id: item.id || Date.now() + Math.floor(Math.random() * 10000),
+              name: item.name,
+              url: item.url || '',
+              imageData: item.imageData || '',
+              dept: item.dept || '',
+              type: item.type || 'app',
+              parent: item.parent || '',
+              category: item.category || 'その他',
+              createdAt: item.createdAt || new Date().toISOString()
+            });
+            insertedCount++;
+          }
+        });
+
+        saveAppsData();
+        closeModal('bulkImportModal');
+        renderApps();
+        checkNewAppsBanner();
+        showToast(`🎉 ${insertedCount} 件のアプリを一括インサートしました！`);
+      } catch (err) {
+        alert('JSONのパースに失敗しました: ' + err.message);
+      }
     }
 
     function openChangePassModal() {
