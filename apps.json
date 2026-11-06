@@ -7,7 +7,8 @@
     "dept": "ぐーぐるどらいぶ 書類 保管 クラウド",
     "type": "app",
     "parent": "",
-    "category": "アプリ"
+    "category": "アプリ",
+    "createdAt": "2026-10-01T00:00:00.000Z"
   },
   {
     "id": 2,
@@ -17,7 +18,8 @@
     "dept": "すぷれっどしーと 表計算 記録",
     "type": "app",
     "parent": "",
-    "category": "アプリ"
+    "category": "アプリ",
+    "createdAt": "2026-10-01T00:00:00.000Z"
   },
   {
     "id": 3,
@@ -27,7 +29,8 @@
     "dept": "じぇみに 人工知能 AI 相談 検索",
     "type": "app",
     "parent": "",
-    "category": "AI"
+    "category": "AI",
+    "createdAt": "2026-10-01T00:00:00.000Z"
   },
   {
     "id": 4,
@@ -37,7 +40,8 @@
     "dept": "ちゃっとじーぴーてぃー AI 人工知能",
     "type": "app",
     "parent": "",
-    "category": "AI"
+    "category": "AI",
+    "createdAt": "2026-10-01T00:00:00.000Z"
   },
   {
     "id": 5,
@@ -47,7 +51,8 @@
     "dept": "まにゅある 手順書 規定",
     "type": "app",
     "parent": "",
-    "category": "マニュアル"
+    "category": "マニュアル",
+    "createdAt": "2026-10-01T00:00:00.000Z"
   },
   {
     "id": 6,
@@ -57,7 +62,8 @@
     "dept": "どうが ゆーちゅーぶ 研修",
     "type": "app",
     "parent": "",
-    "category": "動画マニュアル"
+    "category": "動画マニュアル",
+    "createdAt": "2026-10-01T00:00:00.000Z"
   },
   {
     "id": 7,
@@ -67,6 +73,7 @@
     "dept": "せいかえん ホーム ぽーたる",
     "type": "app",
     "parent": "",
-    "category": "アプリ"
+    "category": "アプリ",
+    "createdAt": "2026-11-06T12:00:00.000Z"
   }
 ]
